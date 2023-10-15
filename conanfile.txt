@@ -1,0 +1,10 @@
+[requires]
+fmt/10.1.1
+asio/1.28.1
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout
