@@ -1,0 +1,4 @@
+#ifndef VITO_AP_CORE_ERROR_DOMAIN_H_
+#define VITO_AP_CORE_ERROR_DOMAIN_H_
+
+#endif
