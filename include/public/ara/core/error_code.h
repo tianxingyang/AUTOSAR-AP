@@ -24,7 +24,7 @@ class ErrorCode final {
   /// @param data optional vendor-specific supplementary error context data
   constexpr ErrorCode(ErrorDomain::CodeType value, const ErrorDomain& domain,
                       ErrorDomain::SupportDataType data = ErrorDomain::SupportDataType{}) noexcept
-      : value_{value}, data_{data}, domain_{domain} {}
+      : value_{value}, data_{data}, domain_{&domain} {}
 
   /// @brief Return the raw error code value.
   /// @return the raw error code value
