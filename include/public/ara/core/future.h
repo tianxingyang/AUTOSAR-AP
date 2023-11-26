@@ -10,6 +10,93 @@
 #include "ara/core/result.h"
 
 namespace ara::core {
+template <typename T, typename E>
+class Future;
+
+/// @brief ara::core specific variant of std::promise class
+/// @tparam T the type of value
+/// @tparam E the type of error
+template <typename T, typename E = ErrorCode>
+class Promise final {
+ public:
+  /// @brief Default constructor.
+  /// This function shall behave the same as the corresponding std::promise function.
+  Promise() = default;
+
+  /// @brief Move constructor.
+  /// This function shall behave the same as the corresponding std::promise function.
+  /// @param other the other instance
+  Promise(Promise&& other) noexcept = default;
+
+  /// @brief Copy constructor shall be disabled.
+  Promise(const Promise&) = delete;
+
+  /// @brief Destructor for Promise objects.
+  /// This function shall behave the same as the corresponding std::promise function.
+  ~Promise() noexcept = default;
+
+  /// @brief Move assignment.
+  /// This function shall behave the same as the corresponding std::promise function.
+  /// @param other the other instance
+  /// @return *this
+  Promise& operator=(Promise&& other) noexcept = default;
+
+  /// @brief Copy assignment operator shall be disabled.
+  Promise& operator=(const Promise&) noexcept = delete;
+
+  /// @brief Swap the contents of this instance with another one's.
+  /// This function shall behave the same as the corresponding std::promise function.
+  /// @param other the other instance
+  void swap(Promise& other) noexcept { promise_.swap(other.promise_); }
+
+  /// @brief Return the associated Future.
+  /// The returned Future is set as soon as this Promise receives the result or an error. This method must only be
+  /// called once as it is not allowed to have multiple Futures per Promise.
+  /// @return a Future
+  Future<T, E> get_future() { return Future<T, E>{promise_.get_future()}; }
+
+  /// @brief Copy a value into the shared state and make the state ready.
+  /// This function shall behave the same as the corresponding std::promise function.
+  /// @param value the value to store
+  void set_value(const T& value) { promise_.set_value(value); }
+
+  /// @brief Move a value into the shared state and make the state ready.
+  /// This function shall behave the same as the corresponding std::promise function.
+  /// @param value the value to store
+  void set_value(T&& value) { promise_.set_value(std::move(value)); }
+
+  /// @brief Move an error into the shared state and make the state ready.
+  /// @param error the error to store.
+  void SetError(E&& error) { promise_.set_value(std::move(error)); }
+
+  /// @brief Copy an error into the shared state and make the state ready.
+  /// @param error the error to store
+  void SetError(const E& error) { promise_.set_value(error); }
+
+  /// @brief Copy a Result into the shared state and make the state ready.
+  /// @param result the result to store
+  void SetResult(const Result<T, E>& result) {
+    if (result) {
+      set_value(result.Value());
+    } else {
+      SetError(result.Error());
+    }
+  }
+
+  /// @brief Move a Result into the shared state and make the state ready.
+  /// @param result the result to store
+  void SetResult(Result<T, E>&& result) {
+    if (result) {
+      set_value(std::move(result).Value());
+    } else {
+      SetError(std::move(result).Error());
+    }
+  }
+
+ private:
+  std::promise<Result<T, E>> promise_;
+};
+
 /// @brief Specifies the state of a Future as returned by wait_for() and wait_until().
 /// These definitions are equivalent to the ones from std::future_status. However, no item equivalent to
 /// std::future_status::deferred is available here.
@@ -29,6 +116,9 @@ enum class future_status : std::uint8_t {
 /// @tparam E the type of errors
 template <typename T, typename E = ErrorCode>
 class Future final {
+  friend class Promise<T, E>;
+  explicit Future(std::future<Result<T, E>>&& future) : future_{std::move(future)} {}
+
  public:
   /// @brief Default constructor.
   /// This function shall behave the same as the corresponding std::future function.
@@ -53,14 +143,17 @@ class Future final {
   /// This function shall behave the same as the corresponding std::future function.
   /// @param other the other instance
   /// @return *this
-  Future& operator=(Future&& other) noexcept { future_ = std::move(other.future_); }
+  Future& operator=(Future&& other) noexcept {
+    future_ = std::move(other.future_);
+    return *this;
+  }
 
   /// @brief Get the value.
   /// This function shall behave the same as the corresponding std::future function.
   /// This function does not participate in overload resolution when the compiler toolchain does not support C++
   /// exceptions.
   /// @return value of type T
-  T get() { return future_.get(); }
+  T get() { return GetResult().ValueOrThrow(); }
 
   /// @brief Get the result.
   /// @return a Result with either a value or an error
@@ -87,11 +180,11 @@ class Future final {
   /// @brief Checks if the Future is valid, i.e. if it has a shared state.
   /// This function shall behave the same as the corresponding std::future function.
   /// @return true if the Future is usable, false otherwise
-  bool valid() const noexcept;
+  bool valid() const noexcept { return future_.valid(); }
 
   /// @brief Wait for a value or an error to be available.
   /// This function shall behave the same as the corresponding std::future function.
-  void wait() const;
+  void wait() const { return future_.wait(); }
 
   /// @brief Wait for the given period, or until a value or an error is available.
   /// @tparam Rep
@@ -99,7 +192,9 @@ class Future final {
   /// @param timeout_duration maximal duration to wait for
   /// @return status that indicates whether the timeout hit or if a value is available
   template <typename Rep, typename Period>
-  future_status wait_for(const std::chrono::duration<Rep, Period>& timeout_duration) const;
+  future_status wait_for(const std::chrono::duration<Rep, Period>& timeout_duration) const {
+    return static_cast<future_status>(future_.wait_for(timeout_duration));
+  }
 
   /// @brief Wait until the given time, or until a value or an error is available.
   /// This function shall behave the same as the corresponding std::future function.
@@ -108,22 +203,26 @@ class Future final {
   /// @param deadline latest point in time to wait
   /// @return status that indicates whether the time was reached or if a value is available
   template <typename Clock, typename Duration>
-  future_status wait_until(const std::chrono::time_point<Clock, Duration>& deadline) const;
+  future_status wait_until(const std::chrono::time_point<Clock, Duration>& deadline) const {
+    return static_cast<future_status>(future_.wait_until(deadline));
+  }
 
   /// @brief Register a callable that gets called when the Future becomes ready.
   /// When func is called, it is guaranteed that get() and GetResult() will not block.
   /// func may be called in the context of this call or in the context of Promise::set_value() or Promise::SetError() or
   /// somewhere else.
   /// The return type of then depends on the return type of func (aka continuation). Let U be the return
-  /// type of the continuation (i.e. a type equivalent to std::result_of_t<std::decay_t<F>(Future<T,E>)>). If U is
-  /// Future<T2,E2> for some types T2, E2, then the return type of then() is Future<T2,E2>. This is known as implicit
-  /// Future unwrapping. If U is Result<T2,E2> for some types T2, E2, then the return type of then() is Future<T2,E2>.
-  /// This is known as implicit Result unwrapping. Otherwise it is Future<U,E>.
+  /// type of the continuation (i.e. a type equivalent to std::result_of_t<std::decay_t<F>(Future<T,E>)>).
+  /// If U is Future<T2,E2> for some types T2, E2, then the return type of then() is Future<T2,E2>. This is known as
+  /// implicit Future unwrapping.
+  /// If U is Result<T2,E2> for some types T2, E2, then the return type of then() is Future<T2,E2>. This is known as
+  /// implicit Result unwrapping.
+  /// Otherwise it is Future<U,E>.
   /// @tparam F the type of the func argument
   /// @param func a callable to register
   /// @return a new Future instance for the result of the continuation.
-  template <typename F>
-  auto then(F&& func);
+  template <typename F,std::enable_if_t<>>
+  auto then(F&& func) -> std::invoke_result_t<std::decay_t<F>, Future> {}
 
   /// @brief Register a callable that gets called when the Future becomes ready
   /// When func is called, it is guaranteed that get() and GetResult() will not block.
@@ -149,7 +248,7 @@ class Future final {
   bool is_ready() const;
 
  private:
-  std::future<T> future_;
+  std::future<Result<T, E>> future_;
 };
 
 /// @brief Specialization of class Future for "void" values.
