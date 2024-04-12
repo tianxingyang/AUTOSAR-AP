@@ -1,6 +1,6 @@
 [requires]
-fmt/10.1.1
-asio/1.28.1
+fmt/10.2.1
+asio/1.30.1
 
 [generators]
 CMakeDeps
