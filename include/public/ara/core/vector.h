@@ -4,6 +4,9 @@
 #include <vector>
 
 namespace ara::core {
+/// @brief A growable container for contiguous elements.
+/// @tparam T the type of element in the vector
+/// @tparam Allocator the allocator to use for any memory allocations
 template <typename T, typename Allocator = std::allocator<T>>
 using Vector = std::vector<T, Allocator>;
 
