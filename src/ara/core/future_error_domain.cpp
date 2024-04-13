@@ -1,13 +1,8 @@
 #include "ara/core/future_error_domain.h"
 
-#include "ara/core/future.h"
-
 namespace ara::core {
 
 const char* FutureErrorDomain::Message(CodeType error_code) const noexcept {
-  Promise<int> promise;
-  auto future = promise.get_future();
-
   switch (const auto code{static_cast<Errc>(error_code)}) {
     case future_errc::broken_promise:
       return "Broken promise";
