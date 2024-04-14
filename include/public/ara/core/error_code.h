@@ -14,7 +14,7 @@ class ErrorCode final {
   /// @tparam EnumT an enum type that contains error code values
   /// @param e a domain-specific error code value
   /// @param data optional vendor-specific supplementary error context data
-  template <typename EnumT, std::enable_if_t<std::is_enum_v<EnumT>> = true>
+  template <typename EnumT, std::enable_if_t<std::is_enum_v<EnumT>, bool> = true>
   constexpr ErrorCode(EnumT e, ErrorDomain::SupportDataType data = ErrorDomain::SupportDataType{}) noexcept
       : ErrorCode{MakeErrorCode(e, data)} {}
 
