@@ -1,1 +1,1 @@
-add_executable(execution_manager execution_manager.cpp)
+add_subdirectory(exec)
