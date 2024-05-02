@@ -15,3 +15,5 @@ CMakeUserPresets.json
 out/
 .idea/
 cmake-build-*/
+third-party/*
+!third-party/.gitkeep

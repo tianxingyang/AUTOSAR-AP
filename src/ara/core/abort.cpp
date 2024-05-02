@@ -1,5 +1,7 @@
 #include "ara/core/abort.h"
 
+#include <functional>
+#include <iostream>
 #include <mutex>
 
 #include "ara/core/vector.h"
@@ -16,6 +18,7 @@ class AbortMgr {
     std::scoped_lock lock{mtx_};
     if (!handler) {
       handlers_.clear();
+      handlers_.push_back(default_abort_handler_);
       return nullptr;
     }
     handlers_.push_back(handler);
@@ -23,6 +26,10 @@ class AbortMgr {
   }
 
   bool AddAbortHandler(AbortHandler handler) noexcept {
+    if (!handler) {
+      return false;
+    }
+
     std::scoped_lock lock{mtx_};
     if (handlers_.size() == kMaxAbortHandlerNum) {
       return false;
@@ -32,12 +39,7 @@ class AbortMgr {
     return true;
   }
 
-  template <typename... Args>
-  void Abort(const Args&... args) noexcept {
-    if (handlers_.empty()) {
-      
-    }
-  }
+  void Abort() { std::invoke(handlers_.back()); }
 
  private:
   AbortMgr() = default;
@@ -49,5 +51,12 @@ class AbortMgr {
   static constexpr uint8_t kMaxAbortHandlerNum{8};
 };
 
-AbortHandler AbortMgr::default_abort_handler_{[]() noexcept { abort(); }};
+AbortHandler AbortMgr::default_abort_handler_{[]() noexcept { std::abort(); }};
+
+namespace internal {
+void Abort(StringView text) noexcept {
+  std::cerr << text << '\n';
+  AbortMgr::Instance().Abort();
+}
+}  // namespace internal
 }  // namespace ara::core

@@ -7,10 +7,10 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeExecutable": "cmake",
-      "buildCommandArgs": "-j 8",
+      "buildCommandArgs": "-j 16",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],
-      "wslPath": "${defaultWSLPath}",
+      "wslPath": "Ubuntu",
       "addressSanitizerEnabled": true,
       "cmakeToolchain": "${projectDir}\\x86_64_toolchain"
     }

@@ -1,9 +1,17 @@
 #ifndef VITO_AP_ABORT_H_
 #define VITO_AP_ABORT_H_
 
+#include "ara/core/string_view.h"
 #include "fmt/format.h"
 
 namespace ara::core {
+
+namespace internal {
+/// @brief abort process
+/// @param text abort message
+void Abort(StringView text) noexcept;
+}  // namespace internal
+
 /// @brief A function declaration with the correct prototype for SetAbortHandler().
 /// This declaration exists only for providing a function type that includes "noexcept" and that acts as base type for a
 /// type alias, which is defined in SWS_CORE_00050.
@@ -39,13 +47,10 @@ bool AddAbortHandler(AbortHandler handler) noexcept;
 /// @param ...args custom texts to be added in the log message being output with automatic storage duration are not
 /// called.
 template <typename... Args>
-void Abort(const Args&... args) noexcept {}
-
-namespace internal {
-/// @brief abort process
-/// @param text abort message
-void Abort(const char* text) noexcept;
-}  // namespace internal
+void Abort(const Args&... args) noexcept {
+  fmt::format_string<Args...> fmt;
+  internal::Abort(fmt::format(fmt, std::forward<Args>(args)...));
+}
 
 }  // namespace ara::core
 
