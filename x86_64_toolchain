@@ -1,6 +1,6 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR amd64)
 
-set(tools /usr/lib/llvm-17)
+set(tools /usr/lib/llvm-16)
 set(CMAKE_C_COMPILER ${tools}/bin/clang)
 set(CMAKE_CXX_COMPILER ${tools}/bin/clang++)

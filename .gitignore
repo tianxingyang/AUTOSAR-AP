@@ -9,10 +9,11 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-CMakeSettings.json
 CMakeUserPresets.json
 
 .vs/
 out/
 .idea/
 cmake-build-*/
+third-party/*
+!third-party/.gitkeep

@@ -1,10 +1,7 @@
 #include "ara/core/core_error_domain.h"
 
-#include "ara/core/vector.h"
-
 namespace ara::core {
 const char* CoreErrorDomain::Message(CodeType error_code) const noexcept {
-  Vector<int> v1;
   switch (const auto code{static_cast<Errc>(error_code)}) {
     case CoreErrc::kInvalidArgument:
       return "Invalid argument";
