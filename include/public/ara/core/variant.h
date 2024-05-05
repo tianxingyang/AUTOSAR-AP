@@ -14,7 +14,7 @@ using Variant = std::variant<Types...>;
 /// @param lhs the first Variant
 /// @param rhs the second Variant
 template <typename... Types>
-void swap(Variant<Types...>& lhs, Variant<Types...> rhs) {
+inline void swap(Variant<Types...>& lhs, Variant<Types...> rhs) {
   lhs.swap(rhs);
 }
 }  // namespace ara::core

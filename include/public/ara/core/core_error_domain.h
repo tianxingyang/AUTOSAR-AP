@@ -56,14 +56,14 @@ inline constexpr CoreErrorDomain core_error_domain_ins;
 
 /// @brief Return a reference to the global CoreErrorDomain.
 /// @return the CoreErrorDomain
-constexpr const ErrorDomain& GetCoreErrorDomain() noexcept { return internal::core_error_domain_ins; }
+inline constexpr const ErrorDomain& GetCoreErrorDomain() noexcept { return internal::core_error_domain_ins; }
 
 /// @brief Create a new ErrorCode within CoreErrorDomain.
 /// This function is used internally by constructors of ErrorCode. It is usually not used directly by users.
 /// @param code the CoreErrorDomain-specific error code value
 /// @param data optional vendor-specific error data
 /// @return a new ErrorCode instance
-constexpr ErrorCode MakeErrorCode(CoreErrc code, ErrorDomain::SupportDataType data) noexcept {
+inline constexpr ErrorCode MakeErrorCode(CoreErrc code, ErrorDomain::SupportDataType data) noexcept {
   return ErrorCode{static_cast<ErrorDomain::CodeType>(code), GetCoreErrorDomain(), data};
 }
 }  // namespace ara::core

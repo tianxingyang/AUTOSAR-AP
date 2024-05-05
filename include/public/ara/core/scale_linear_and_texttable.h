@@ -70,7 +70,8 @@ class ScaleLinearAndTexttable final {
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator==(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator==(const ScaleLinearAndTexttable<T>& lhs,
+                                 const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs == rhs;
 }
 
@@ -80,7 +81,7 @@ constexpr bool operator==(const ScaleLinearAndTexttable<T>& lhs, const ScaleLine
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator==(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
+inline constexpr bool operator==(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
   return lhs == rhs;
 }
 
@@ -90,7 +91,7 @@ constexpr bool operator==(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) n
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator==(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator==(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs == rhs;
 }
 
@@ -110,7 +111,7 @@ constexpr bool operator!=(const ScaleLinearAndTexttable<T>& lhs, const ScaleLine
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is not equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator!=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
+inline constexpr bool operator!=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
   return lhs != rhs;
 }
 
@@ -120,7 +121,7 @@ constexpr bool operator!=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) n
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is not equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator!=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator!=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs != rhs;
 }
 
@@ -130,7 +131,7 @@ constexpr bool operator!=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) n
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is less than rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator<(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator<(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs < rhs;
 }
 
@@ -140,7 +141,7 @@ constexpr bool operator<(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinea
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is less than rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator<(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
+inline constexpr bool operator<(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
   return lhs < rhs;
 }
 
@@ -150,7 +151,7 @@ constexpr bool operator<(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) no
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is less than rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator<(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator<(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs < rhs;
 }
 
@@ -160,7 +161,8 @@ constexpr bool operator<(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) no
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is less than or equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator<=(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator<=(const ScaleLinearAndTexttable<T>& lhs,
+                                 const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs <= rhs;
 }
 
@@ -170,7 +172,7 @@ constexpr bool operator<=(const ScaleLinearAndTexttable<T>& lhs, const ScaleLine
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is less than or equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator<=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
+inline constexpr bool operator<=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
   return lhs <= rhs;
 }
 
@@ -180,7 +182,7 @@ constexpr bool operator<=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) n
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is less than or equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator<=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator<=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs <= rhs;
 }
 
@@ -190,7 +192,7 @@ constexpr bool operator<=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) n
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is greater than rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator>(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator>(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs > rhs;
 }
 
@@ -200,7 +202,7 @@ constexpr bool operator>(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinea
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is greater than rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator>(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
+inline constexpr bool operator>(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
   return lhs > rhs;
 }
 
@@ -210,7 +212,7 @@ constexpr bool operator>(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) no
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is greater than rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator>(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator>(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs > rhs;
 }
 
@@ -220,7 +222,8 @@ constexpr bool operator>(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) no
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is greater than or equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator>=(const ScaleLinearAndTexttable<T>& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator>=(const ScaleLinearAndTexttable<T>& lhs,
+                                 const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs >= rhs;
 }
 
@@ -230,7 +233,7 @@ constexpr bool operator>=(const ScaleLinearAndTexttable<T>& lhs, const ScaleLine
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is greater than or equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator>=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
+inline constexpr bool operator>=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) noexcept {
   return lhs >= rhs;
 }
 
@@ -240,7 +243,7 @@ constexpr bool operator>=(const ScaleLinearAndTexttable<T>& lhs, const T& rhs) n
 /// @param rhs the right-hand side of the comparison
 /// @return true if lhs is greater than or equal to rhs, false otherwise
 template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-constexpr bool operator>=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
+inline constexpr bool operator>=(const T& lhs, const ScaleLinearAndTexttable<T>& rhs) noexcept {
   return lhs >= rhs;
 }
 }  // namespace ara::core

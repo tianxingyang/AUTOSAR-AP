@@ -436,7 +436,7 @@ class Result<void, E> final {
   /// @return a Result that contains an error
   template <typename... Args, std::enable_if_t<std::is_constructible_v<E, Args&&...>, bool> = true>
   static Result FromError(Args&&... args) {
-    return {E{std::forward<Args&&>(args)...}};
+    return Result{E{std::forward<Args&&>(args)...}};
   }
 
   /// @brief Copy-assign another Result to this instance.

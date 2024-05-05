@@ -64,9 +64,9 @@ namespace internal {
 inline constexpr FutureErrorDomain future_error_domain;
 }
 
-constexpr const ErrorDomain& GetFutureErrorDomain() noexcept { return internal::future_error_domain; }
+inline constexpr const ErrorDomain& GetFutureErrorDomain() noexcept { return internal::future_error_domain; }
 
-constexpr ErrorCode MakeErrorCode(future_errc code, ErrorDomain::SupportDataType data) noexcept {
+inline constexpr ErrorCode MakeErrorCode(future_errc code, ErrorDomain::SupportDataType data) noexcept {
   return ErrorCode{static_cast<ErrorDomain::CodeType>(code), GetFutureErrorDomain(), data};
 }
 }  // namespace ara::core
