@@ -31,6 +31,12 @@ enum class ClientState : std::int8_t {
   /// @brief Remote client is connected.
   kConnected,
 };
+
+class LoggingHandler {
+ public:
+  virtual ~LoggingHandler() = default;
+  virtual void Emit() = 0;
+};
 }  // namespace ara::log
 
 #endif  // !VITO_AP_COMMON_H_

@@ -1,5 +1,7 @@
 #include "ara/core/initialization.h"
 
+#include "ara/core/result.h"
+
 namespace ara::core {
 Result<void> Initialize() noexcept {
   using R = Result<void>;

@@ -11,11 +11,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CONAN_GEN_DIR ${CMAKE_SOURCE_DIR}/third-party/build/Debug/generators)
 
 find_package(fmt REQUIRED
-PATHS ${CONAN_GEN_DIR}
+  PATHS ${CONAN_GEN_DIR}
 )
 
 find_package(asio REQUIRED
-PATHS ${CONAN_GEN_DIR}
+  PATHS ${CONAN_GEN_DIR}
+)
+
+find_package(nlohmann_json REQUIRED
+  PATHS ${CONAN_GEN_DIR}
 )
 
 add_subdirectory(src)

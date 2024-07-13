@@ -12,12 +12,17 @@
 #include "ara/log/common.h"
 
 namespace ara::log {
+class Logger;
+
 /// @brief Wrapper type for holding a payload argument with its attributes.
 /// The setup of this class is implementation-defined.
+template <typename T>
 class Argument {};
 
 class LogStream final {
  public:
+  LogStream(LogLevel log_level, const Logger& logger);
+
   /// @brief Sends out the current log buffer and initiates a new message stream.
   void Flush() noexcept;
 
@@ -110,6 +115,9 @@ class LogStream final {
   /// @param tag the tag text to attach to the current message
   /// @return *this
   LogStream& WithTag(core::StringView tag) noexcept;
+
+ private:
+  bool Enabled() const;
 
  private:
   struct Impl;

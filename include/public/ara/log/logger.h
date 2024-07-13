@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "ara/core/string.h"
 #include "ara/log/log_stream.h"
 
 namespace ara::log {
@@ -123,6 +124,88 @@ constexpr Format AutoFloat(std::uint16_t precision = 6) noexcept;
 /// round-trip safety.
 /// @return a Format instance
 constexpr Format AutoFloatMax() noexcept;
+
+/// @brief Interface for sending log messages.
+class Logger {
+ public:
+  using Key = core::String;
+  /// @brief Creates a LogStream object.
+  /// Returned object will accept arguments via the insert stream operator "@c <<".
+  /// @return LogStream object of Fatal severity.
+  [[nodiscard]] LogStream LogFatal() const noexcept;
+
+  /// @brief Same as Logger::LogFatal().
+  /// @return LogStream object of Error severity.
+  [[nodiscard]] LogStream LogError() const noexcept;
+
+  /// @brief Same as Logger::LogFatal().
+  /// @return LogStream object of Warn severity.
+  [[nodiscard]] LogStream LogWarn() const noexcept;
+
+  /// @brief Same as Logger::LogFatal().
+  /// @return LogStream object of Info severity.
+  [[nodiscard]] LogStream LogInfo() const noexcept;
+
+  /// @brief Same as Logger::LogFatal().
+  /// @return LogStream object of Debug severity.
+  [[nodiscard]] LogStream LogDebug() const noexcept;
+
+  /// @brief Same as Logger::LogFatal().
+  /// @return LogStream object of Verbose severity.
+  [[nodiscard]] LogStream LogVerbose() const noexcept;
+
+  /// @brief Check current configured log reporting level.
+  /// Applications may want to check the actual configured reporting log level of certain loggers before doing log data
+  /// preparation that is runtime intensive.
+  /// @param log_level The to be checked log level.
+  /// @return True if desired log level satisfies the configured reporting level.
+  [[nodiscard]] bool IsEnabled(LogLevel log_level) const noexcept;
+
+  /// @brief Log message with a programmatically determined log level can be written.
+  /// @param log_level the log level to use for this LogStream instance
+  /// @return a new LogStream instance with the given log level
+  [[nodiscard]] LogStream WithLevel(LogLevel log_level) const noexcept;
+
+  /// @brief Log a modeled message.
+  /// If this function is called with an argument list that does not match the modeled message, the program is
+  /// ill-formed.
+  /// @tparam MsgId the type of the id parameter
+  /// @tparam Params the types of the args parameters
+  /// @param id an implementation-defined type identifying the message object
+  /// @param args the arguments to add to the message
+  template <typename MsgId, typename... Params>
+  void Log(const MsgId& id, const Params&... args) noexcept {}
+
+  template <typename... Attrs, typename MsgId, typename... Params>
+  void LogWith(const std::tuple<Attrs...>& attrs, const MsgId& msg_id, const Params&... params) noexcept {}
+
+  /// @brief Set log level threshold for this Logger instance.
+  /// @param threshold the new threshold
+  void SetThreshold(LogLevel threshold);
+
+ private:
+  Logger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel threshold);
+
+  [[nodiscard]] const Key& GetKey() const;
+
+  void Handle(const LogStream& log_stream);
+
+  void MakeRecord();
+
+ private:
+  friend class LoggerManager;
+  friend class LogStream;
+  struct Impl;
+  std::shared_ptr<Impl> impl_;
+};
+
+/// @brief Creates a Logger object, holding the context which is registered in the Logging framework. If no model is
+/// available the sink shall be the console per default.
+/// @param ctx_id The context ID.
+/// @param ctx_desc The description of the provided context ID.
+/// @param ctx_def_log_level The default log level, set to Warning severity if not explicitly specified.
+/// @return Reference to the internal managed instance of a Logger object. Ownership stays within the Logging framework.
+Logger& CreateLogger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel ctx_def_log_level = LogLevel::kWarn);
 
 }  // namespace ara::log
 #endif  // !VITO_AP_LOGGER_H_

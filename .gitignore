@@ -17,3 +17,4 @@ out/
 cmake-build-*/
 third-party/*
 !third-party/.gitkeep
+build/

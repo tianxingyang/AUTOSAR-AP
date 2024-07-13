@@ -3,7 +3,11 @@ project(log)
 set(${PROJECT_NAME}_SOURCES 
   "logger.cpp"
   "log_stream.cpp"
-  "log_error_domain.cpp")
+  "log_error_domain.cpp"
+  "dlt_message.cpp"
+  "logger_manager.cpp"
+  "logging_handler.cpp"
+)
 
 add_project_library(${PROJECT_NAME} ${PROJECT_NAME}_SOURCES)
 

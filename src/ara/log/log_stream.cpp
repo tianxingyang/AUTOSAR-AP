@@ -1,11 +1,16 @@
 #include "ara/log/log_stream.h"
 
+#include <fmt/format.h>
+
 #include <cstdint>
 
 #include "ara/core/utility.h"
 #include "ara/log/dlt_message.h"
 #include "ara/log/log_stream_buffer.h"
+#include "ara/log/logger.h"
+#include "ara/log/logger_manager.h"
 #include "fmt/format.h"
+#include "fmt/ranges.h"
 
 namespace {
 ara::core::StringView LogLevel2String(ara::log::LogLevel log_level) {
@@ -32,84 +37,134 @@ ara::core::StringView LogLevel2String(ara::log::LogLevel log_level) {
 
 namespace ara::log {
 struct LogStream::Impl {
-  Buffer buffer;
+  std::string s;
+  LogLevel log_level;
+  Logger::Key owner_key;
 };
 
-void LogStream::Flush() noexcept {}
+LogStream::LogStream(LogLevel log_level, const Logger& logger) : impl_{std::make_shared<Impl>()} {
+  impl_->log_level = log_level;
+}
+
+void LogStream::Flush() noexcept {
+  auto logger_opt = LoggerManager::Instance().GetLogger(impl_->owner_key);
+  if (!logger_opt) {
+    fmt::print("logger[{}] doesn't exist.", impl_->owner_key);
+    return;
+  }
+
+  logger_opt->get().Handle(*this);
+}
 
 LogStream& LogStream::operator<<(bool value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint8_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint16_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint32_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint64_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::int8_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::int16_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& ara::log::LogStream::operator<<(std::int32_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::int64_t value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(float value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(double value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(const core::StringView value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
 LogStream& LogStream::operator<<(const char* const value) noexcept {
-  impl_->buffer.Append(value);
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+  }
   return *this;
 }
 
-LogStream& LogStream::operator<<(core::Span<const core::Byte> data) noexcept {
-  impl_->buffer.Append(data);
+LogStream& LogStream::operator<<(core::Span<const core::Byte> value) noexcept {
+  if (Enabled()) {
+    fmt::format_to(std::back_inserter(impl_->s), "{}", fmt::join(value, ""));
+  }
   return *this;
 }
 
 LogStream& LogStream::WithLocation(core::StringView file, int line) noexcept { return *this; }
 
 LogStream& LogStream::WithTag(core::StringView tag) noexcept { return *this; }
+
+bool LogStream::Enabled() const {
+  const auto loggerOpt = LoggerManager::Instance().GetLogger(impl_->owner_key);
+  if (!loggerOpt) {
+    return false;
+  }
+  return loggerOpt->get().IsEnabled(impl_->log_level);
+}
 
 LogStream& operator<<(LogStream& out, LogLevel value) noexcept { return out << LogLevel2String(value); }
 

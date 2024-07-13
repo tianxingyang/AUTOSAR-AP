@@ -10,7 +10,7 @@ template <typename T>
 using Optional = std::optional<T>;
 
 template <typename T>
-inline void swap(Optional<T>& lhs, Optional<T>& rhs) {
+void swap(Optional<T>& lhs, Optional<T>& rhs) {
   lhs.swap(rhs);
 }
 }  // namespace ara::core
