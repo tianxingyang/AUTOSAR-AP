@@ -6,6 +6,7 @@
 #include "ara/core/array.h"
 #include "ara/core/result.h"
 #include "ara/core/utility.h"
+#include "ara/core/span.h"
 #include "ara/log/log_error_domain.h"
 
 namespace ara::log {

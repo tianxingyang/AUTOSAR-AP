@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+set(CMAKE_COMPILE_WARNING_AS_ERROR on)
+
 include(cmake/vito_ap.cmake)
 
 project(VitoAp VERSION 0.0.1)

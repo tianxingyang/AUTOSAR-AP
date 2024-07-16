@@ -117,8 +117,8 @@ class Timestamp {
 class BaseHeader {
  private:
   HeaderType header_type_;
-  std::uint8_t message_counter_{0};
-  std::uint16_t message_length_{0};
+  [[maybe_unused]]std::uint8_t message_counter_{0};
+  [[maybe_unused]]std::uint16_t message_length_{0};
   core::Optional<MessageInfo> message_info_;
   core::Optional<std::uint8_t> number_of_arguments_;
   core::Optional<Timestamp> timestamp_;
@@ -146,7 +146,7 @@ class Payload {
  private:
   class Argument {
    private:
-    uint32_t type_info_{0U};
+    [[maybe_unused]]uint32_t type_info_{0U};
     core::Vector<core::Byte> data_payload_;
   };
 

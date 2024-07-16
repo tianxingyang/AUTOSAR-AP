@@ -1,31 +1,38 @@
 #ifndef VITO_AP_LOGGING_HANDLER_
 #define VITO_AP_LOGGING_HANDLER_
 
-#include "ara/log/common.h"
-
 namespace ara::log {
+
+class LogStream;
+
+class LoggingHandler {
+ public:
+  virtual ~LoggingHandler() = default;
+  virtual void Emit(const LogStream&) = 0;
+};
+
 class ConsoleHandler final : public LoggingHandler {
  public:
   ~ConsoleHandler() override = default;
-  void Emit() override;
+  void Emit(const LogStream&) override;
 };
 
 class FileHandler : public LoggingHandler {
  public:
   ~FileHandler() override = default;
-  void Emit() override;
+  void Emit(const LogStream&) override;
 };
 
 class NetworkHandler : public LoggingHandler {
  public:
   ~NetworkHandler() override = default;
-  void Emit() override;
+  void Emit(const LogStream&) override;
 };
 
 class BaseRotatingHandler : public FileHandler {
  public:
   ~BaseRotatingHandler() override = default;
-  void Emit() override;
+  void Emit(const LogStream&) override;
 
  protected:
   virtual bool ShouldRollover() = 0;
