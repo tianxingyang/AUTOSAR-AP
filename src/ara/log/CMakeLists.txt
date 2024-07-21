@@ -7,6 +7,7 @@ set(${PROJECT_NAME}_SOURCES
   "dlt_message.cpp"
   "logger_manager.cpp"
   "logging_handler.cpp"
+  "log_config.cpp"
 )
 
 add_project_library(${PROJECT_NAME} ${PROJECT_NAME}_SOURCES)
@@ -17,4 +18,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   core
-  fmt::fmt)
+  fmt::fmt
+  nlohmann_json::nlohmann_json
+)

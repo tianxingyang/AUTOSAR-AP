@@ -5,12 +5,6 @@
 #include "ara/log/log_error_domain.h"
 
 namespace ara::log {
-
-LoggerManager& LoggerManager::Instance() {
-  static LoggerManager singleton;
-  return singleton;
-}
-
 core::Result<void> LoggerManager::Init() { return {}; }
 
 Logger& LoggerManager::CreateLogger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel threshold) {

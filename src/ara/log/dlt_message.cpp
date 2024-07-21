@@ -2,6 +2,8 @@
 
 #include <chrono>
 
+#include "ara/log/dlt_message.h"
+
 namespace ara::log::dlt {
 constexpr std::uint8_t kVersionNumber{2};
 
@@ -9,6 +11,20 @@ HeaderType::HeaderType() {
   value_[5] = (kVersionNumber >> 0) & 1;
   value_[6] = (kVersionNumber >> 1) & 1;
   value_[7] = (kVersionNumber >> 2) & 1;
+}
+
+HeaderType HeaderType::VerboseMode() {
+  HeaderType header_type;
+  header_type.SetContentInfo(Cnti::kVerboseModeDataMessage);
+  header_type.SetWithEcuId(true);
+  header_type.SetWithAppAndCtxId(true);
+  header_type.SetWithSessionId(false);
+  header_type.SetWithSourceFileNameAndLine(false);
+  header_type.SetWithTags(false);
+  header_type.SetWithPrivacyLevel(false);
+  header_type.SetWithSegmentation(false);
+
+  return header_type;
 }
 
 void HeaderType::SetContentInfo(Cnti cnti) {
@@ -52,6 +68,18 @@ void HeaderType::SetWithSegmentation(const bool with) { value_[11] = with; }
 
 bool HeaderType::GetWithSegmentation() const { return value_[11]; }
 
+MessageInfo MessageInfo::LogMessage(LogLevel log_level) {
+  return MessageInfo{MessageType::kLog, static_cast<std::uint8_t>(log_level)};
+}
+
+MessageInfo MessageInfo::TraceMessage(TraceMessageInfo trace_info) {
+  return MessageInfo{MessageType::kTrace, static_cast<std::uint8_t>(trace_info)};
+}
+
+MessageInfo MessageInfo::NetworkMessage(NetworkMessageInfo network_info) {
+  return MessageInfo{MessageType::kNetwork, static_cast<std::uint8_t>(network_info)};
+}
+
 MessageInfo::MessageInfo(MessageType message_type, std::uint8_t const message_type_info) {
   value_[1] = (static_cast<uint8_t>(message_type) >> 1) & 1;
   value_[2] = (static_cast<uint8_t>(message_type) >> 2) & 1;
@@ -71,4 +99,18 @@ Timestamp::Timestamp() {
 
   // TODO set mask
 }
+
+BaseHeader BaseHeader::VerboseModeLogBaseHeader(HeaderType&& header_type, LogLevel log_level) {
+  BaseHeader base_header{std::move(header_type)};
+  base_header.message_info_ = MessageInfo::LogMessage(log_level);
+  return base_header;
+}
+
+BaseHeader::BaseHeader(HeaderType&& header_type) : header_type_{header_type} {}
+
+std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level) {
+  return std::make_shared<Message>(BaseHeader::VerboseModeLogBaseHeader(HeaderType::VerboseMode(), log_level));
+}
+
+Message::Message(BaseHeader&& base_header) : base_header_{base_header} {}
 }  // namespace ara::log::dlt

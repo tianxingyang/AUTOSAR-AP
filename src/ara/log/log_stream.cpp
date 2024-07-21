@@ -40,10 +40,11 @@ struct LogStream::Impl {
   std::string s;
   LogLevel log_level;
   Logger::Key owner_key;
-  dlt::Message dlt_message;
+  std::shared_ptr<dlt::Message> dlt_message{nullptr};
 };
 
 LogStream::LogStream(LogLevel log_level, const Logger& logger) : impl_{std::make_shared<Impl>()} {
+  impl_->dlt_message = dlt::Message::VerboseModeLogMessage(log_level);
   impl_->log_level = log_level;
 }
 

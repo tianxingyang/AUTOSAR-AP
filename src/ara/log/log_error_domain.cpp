@@ -7,6 +7,8 @@ const char* LogErrorDomain::Message(CodeType error_code) const noexcept {
       return "buffer overflow";
     case Errc::kLoggerNotFound:
       return "logger not found";
+    case Errc::kInvalidConfig:
+      return "invalid log config";
     default:
       return "Unknown error";
   }

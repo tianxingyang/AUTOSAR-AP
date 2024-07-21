@@ -6,6 +6,7 @@
 
 #include "ara/core/optional.h"
 #include "ara/core/result.h"
+#include "ara/core/singleton_pattern.h"
 #include "ara/core/string_view.h"
 #include "ara/core/vector.h"
 #include "ara/log/common.h"
@@ -21,10 +22,8 @@ struct LoggerImpl {
 };
 }  // namespace internal
 
-class LoggerManager {
+class LoggerManager : public core::Singleton<LoggerManager> {
  public:
-  static LoggerManager& Instance();
-
   core::Result<void> Init();
 
   Logger& CreateLogger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel threshold);
@@ -33,7 +32,8 @@ class LoggerManager {
 
   core::Result<void> AddLoggingHandler(Logger::Key key, std::unique_ptr<LoggingHandler> logging_handler);
 
-  core::Result<std::reference_wrapper<core::Vector<std::unique_ptr<LoggingHandler>>>> GetLoggingHandlers(Logger::Key key);
+  core::Result<std::reference_wrapper<core::Vector<std::unique_ptr<LoggingHandler>>>> GetLoggingHandlers(
+      Logger::Key key);
 
  private:
   core::Optional<std::reference_wrapper<internal::LoggerImpl>> GetLoggerImpl(const Logger::Key& key);

@@ -2,18 +2,20 @@
 #define VITO_AP_DLT_MESSAGE_H_
 
 #include <bitset>
+#include <memory>
 
 #include "ara/core/optional.h"
 #include "ara/core/string.h"
 #include "ara/core/utility.h"
 #include "ara/core/vector.h"
+#include "ara/log/common.h"
 
 namespace ara::log::dlt {
 constexpr std::uint8_t kHtyp2Len{32};
 
 class HeaderType {
  public:
-  HeaderType();
+  static HeaderType VerboseMode();
 
   enum class Cnti : std::uint8_t {
     kVerboseModeDataMessage = 0x0,
@@ -53,6 +55,9 @@ class HeaderType {
   void SetWithSegmentation(bool with);
 
   bool GetWithSegmentation() const;
+
+ private:
+  HeaderType();
 
  private:
   std::bitset<kHtyp2Len> value_;
@@ -99,6 +104,13 @@ class MessageInfo {
   };
 
  public:
+  static MessageInfo LogMessage(LogLevel log_level);
+
+  static MessageInfo TraceMessage(TraceMessageInfo trace_info);
+
+  static MessageInfo NetworkMessage(NetworkMessageInfo network_info);
+
+ private:
   MessageInfo(MessageType message_type, std::uint8_t message_type_info);
 
  private:
@@ -115,10 +127,16 @@ class Timestamp {
 };
 
 class BaseHeader {
+ public:
+  static BaseHeader VerboseModeLogBaseHeader(HeaderType&& header_type, LogLevel log_level);
+
+ private:
+  explicit BaseHeader(HeaderType&& header_type);
+
  private:
   HeaderType header_type_;
-  [[maybe_unused]]std::uint8_t message_counter_{0};
-  [[maybe_unused]]std::uint16_t message_length_{0};
+  [[maybe_unused]] std::uint8_t message_counter_{0};
+  [[maybe_unused]] std::uint16_t message_length_{0};
   core::Optional<MessageInfo> message_info_;
   core::Optional<std::uint8_t> number_of_arguments_;
   core::Optional<Timestamp> timestamp_;
@@ -146,7 +164,7 @@ class Payload {
  private:
   class Argument {
    private:
-    [[maybe_unused]]uint32_t type_info_{0U};
+    [[maybe_unused]] uint32_t type_info_{0U};
     core::Vector<core::Byte> data_payload_;
   };
 
@@ -154,6 +172,12 @@ class Payload {
 };
 
 class Message {
+ public:
+  static std::shared_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
+
+ private:
+  Message(BaseHeader&& base_header);
+
  private:
   BaseHeader base_header_;
   core::Optional<ExtensionHeader> ext_header_;

@@ -420,7 +420,7 @@ class Result<void, E> final {
   /// @brief Build a new Result from the specified error (given as lvalue).
   /// @param e the error to put into the Result
   /// @return a Result that contains the error e
-  static Result FromError(const E& e) { return {e}; }
+  static Result FromError(const E& e) { return Result{e}; }
 
   /// @brief Build a new Result from the specified error (given as rvalue).
   /// @param e the error to put into the Result

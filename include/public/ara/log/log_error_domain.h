@@ -11,6 +11,7 @@ namespace ara::log {
 enum class LogErrc : std::uint8_t {
   kBufferOverflow = 0,
   kLoggerNotFound = 1,
+  kInvalidConfig = 2,
 };
 
 class LogException : public core::Exception {
