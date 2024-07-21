@@ -172,11 +172,17 @@ class Payload {
 };
 
 class Message {
+  struct ThisIsPrivateType;
+
  public:
-  static std::shared_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
+  static std::unique_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
+
+  explicit Message(ThisIsPrivateType, BaseHeader&& base_header);
 
  private:
-  Message(BaseHeader&& base_header);
+  struct ThisIsPrivateType {};
+
+  static std::unique_ptr<Message> Create(BaseHeader&& base_header);
 
  private:
   BaseHeader base_header_;

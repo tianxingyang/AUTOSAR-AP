@@ -40,7 +40,7 @@ struct LogStream::Impl {
   std::string s;
   LogLevel log_level;
   Logger::Key owner_key;
-  std::shared_ptr<dlt::Message> dlt_message{nullptr};
+  std::unique_ptr<dlt::Message> dlt_message{nullptr};
 };
 
 LogStream::LogStream(LogLevel log_level, const Logger& logger) : impl_{std::make_shared<Impl>()} {
