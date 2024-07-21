@@ -2,7 +2,9 @@
 #define VITO_AP_DLT_MESSAGE_H_
 
 #include <bitset>
+#include <cstring>
 #include <memory>
+#include <type_traits>
 
 #include "ara/core/optional.h"
 #include "ara/core/string.h"
@@ -162,9 +164,46 @@ class ExtensionHeader {
 
 class Payload {
  private:
+  static constexpr std::uint8_t kTypeBoolOffset{4U};
+  static constexpr std::uint8_t kTypeSignedOffset{5U};
+  static constexpr std::uint8_t kTypeUnsignedOffset{6U};
+  static constexpr std::uint8_t kTypeFloatOffset{7U};
+  static constexpr std::uint8_t kTypeStringOffset{9U};
   class Argument {
+   public:
+    template <typename T>
+    Argument(T&& value) {
+      if constexpr (std::is_same_v<T, bool>) {
+        type_info_ |= 1U << kTypeBoolOffset;
+        data_payload_.resize(sizeof(T));
+        std::memcpy(data_payload_.data(), &value, sizeof(T));
+      } else if constexpr (std::is_signed_v<T>()) {
+        type_info_ |= 1U << kTypeSignedOffset;
+        data_payload_.resize(sizeof(T));
+        std::memcpy(data_payload_.data(), &value, sizeof(T));
+      } else if constexpr (std::is_unsigned_v<T>()) {
+        type_info_ |= 1U << kTypeUnsignedOffset;
+        data_payload_.resize(sizeof(T));
+        std::memcpy(data_payload_.data(), &value, sizeof(T));
+      } else if constexpr (std::is_floating_point_v<T>()) {
+        type_info_ |= 1U << kTypeFloatOffset;
+        data_payload_.resize(sizeof(T));
+        std::memcpy(data_payload_.data(), &value, sizeof(T));
+      } else if constexpr (std::is_same_v<T, core::String>) {
+        type_info_ |= 1U << kTypeStringOffset;
+        data_payload_.resize(value.size());
+        std::memcpy(data_payload_.data(), value.data(), value.size());
+      }
+    }
+
+    auto GetInteger() const;
+
+    auto GetString() const;
+
+    auto GetFloat() const;
+
    private:
-    [[maybe_unused]] uint32_t type_info_{0U};
+    uint32_t type_info_{0U};
     core::Vector<core::Byte> data_payload_;
   };
 
@@ -175,14 +214,14 @@ class Message {
   struct ThisIsPrivateType;
 
  public:
-  static std::unique_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
+  static std::shared_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
 
   explicit Message(ThisIsPrivateType, BaseHeader&& base_header);
 
  private:
   struct ThisIsPrivateType {};
 
-  static std::unique_ptr<Message> Create(BaseHeader&& base_header);
+  static std::shared_ptr<Message> Create(BaseHeader&& base_header);
 
  private:
   BaseHeader base_header_;

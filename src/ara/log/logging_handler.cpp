@@ -1,9 +1,9 @@
 #include "ara/log/logging_handler.h"
 
-#include "ara/log/log_stream.h"
+#include "ara/log/dlt_message.h"
 
 namespace ara::log {
-void ConsoleHandler::Emit(const LogStream& log_stream) {
-    
+void ConsoleHandler::Emit(std::shared_ptr<dlt::Message> msg) {
+
 }
 }  // namespace ara::log

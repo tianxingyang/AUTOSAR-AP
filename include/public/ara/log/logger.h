@@ -7,6 +7,11 @@
 #include "ara/log/log_stream.h"
 
 namespace ara::log {
+
+namespace dlt {
+class Message;
+}
+
 /// @brief Format specifiers for log message arguments.
 enum class Fmt : std::uint16_t {
   /// @brief implementation-defined formatting
@@ -188,7 +193,7 @@ class Logger {
 
   [[nodiscard]] const Key& GetKey() const;
 
-  void Handle(const LogStream& log_stream);
+  void Handle(std::shared_ptr<dlt::Message> message);
 
   void MakeRecord();
 
@@ -207,5 +212,21 @@ class Logger {
 /// @return Reference to the internal managed instance of a Logger object. Ownership stays within the Logging framework.
 Logger& CreateLogger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel ctx_def_log_level = LogLevel::kWarn);
 
+/// @brief Create a wrapper object for the given arguments.
+/// Calling this function shall be ill-formed if any of these conditions are met:
+/// - T is not an arithmetic type and not "bool" and not convertible to "ara::core::StringView" and not convertible to
+/// "ara::core::Span<const ara::core::Byte>".
+/// - T is convertible to "ara::core::StringView" or convertible to "ara::core::Span<const ara::core::Byte>" or "bool",
+/// and "unit" is not "nullptr"
+/// @param arg an argument payload object
+/// @param name an optional "name" attribute for arg
+/// @param unit an optional "unit" attribute for arg
+/// @param format an optional formatting hint for integral or floating-point arguments; the default is to use the
+/// implementation’s standard formatting
+/// @return a wrapper object holding the supplied arguments
+template <typename T>
+Argument<T> Arg(T&& arg, const char* name = nullptr, const char* unit = nullptr, Format format = Dflt()) {
+  return Argument<T>{};  // TODO
+}
 }  // namespace ara::log
 #endif  // !VITO_AP_LOGGER_H_

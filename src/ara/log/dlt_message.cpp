@@ -108,13 +108,13 @@ BaseHeader BaseHeader::VerboseModeLogBaseHeader(HeaderType&& header_type, LogLev
 
 BaseHeader::BaseHeader(HeaderType&& header_type) : header_type_{header_type} {}
 
-std::unique_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level) {
+std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level) {
   return Message::Create(BaseHeader::VerboseModeLogBaseHeader(HeaderType::VerboseMode(), log_level));
 }
 
 Message::Message(ThisIsPrivateType, BaseHeader&& base_header) : base_header_{base_header} {}
 
-std::unique_ptr<Message> Message::Create(BaseHeader&& base_header) {
-  return std::make_unique<Message>(ThisIsPrivateType{}, std::move(base_header));
+std::shared_ptr<Message> Message::Create(BaseHeader&& base_header) {
+  return std::make_shared<Message>(ThisIsPrivateType{}, std::move(base_header));
 }
 }  // namespace ara::log::dlt

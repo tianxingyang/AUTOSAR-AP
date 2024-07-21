@@ -1,7 +1,7 @@
 #include "ara/log/logger.h"
 
 #include "ara/log/logger_manager.h"
-#include "fmt/format.h"
+#include "fmt/core.h"
 
 namespace {
 constexpr std::uint16_t kDefaultIntPrecision{7};
@@ -59,7 +59,7 @@ Logger::Logger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel thre
 
 const Logger::Key& Logger::GetKey() const { return impl_->ctx_id; }
 
-void Logger::Handle(const LogStream& log_stream) {
+void Logger::Handle(std::shared_ptr<dlt::Message> message) {
   auto handlers_result = LoggerManager::Instance().GetLoggingHandlers(GetKey());
   if (!handlers_result) {
     fmt::print("get handlers failed, {}", handlers_result.Error().Message());
@@ -67,7 +67,7 @@ void Logger::Handle(const LogStream& log_stream) {
   }
 
   for (auto& handler : handlers_result->get()) {
-    handler->Emit(log_stream);
+    handler->Emit(message);
   }
 }
 

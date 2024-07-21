@@ -6,7 +6,6 @@
 
 #include "ara/core/utility.h"
 #include "ara/log/dlt_message.h"
-#include "ara/log/log_stream_buffer.h"
 #include "ara/log/logger.h"
 #include "ara/log/logger_manager.h"
 #include "fmt/format.h"
@@ -40,7 +39,7 @@ struct LogStream::Impl {
   std::string s;
   LogLevel log_level;
   Logger::Key owner_key;
-  std::unique_ptr<dlt::Message> dlt_message{nullptr};
+  std::shared_ptr<dlt::Message> dlt_message{nullptr};
 };
 
 LogStream::LogStream(LogLevel log_level, const Logger& logger) : impl_{std::make_shared<Impl>()} {
@@ -55,7 +54,7 @@ void LogStream::Flush() noexcept {
     return;
   }
 
-  logger_opt->get().Handle(*this);
+  logger_opt->get().Handle(impl_->dlt_message);
 }
 
 LogStream& LogStream::operator<<(bool value) noexcept {
