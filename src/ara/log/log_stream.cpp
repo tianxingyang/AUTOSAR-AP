@@ -36,7 +36,6 @@ ara::core::StringView LogLevel2String(ara::log::LogLevel log_level) {
 
 namespace ara::log {
 struct LogStream::Impl {
-  std::string s;
   LogLevel log_level;
   Logger::Key owner_key;
   std::shared_ptr<dlt::Message> dlt_message{nullptr};
@@ -59,98 +58,98 @@ void LogStream::Flush() noexcept {
 
 LogStream& LogStream::operator<<(bool value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint8_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint16_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint32_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::uint64_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::int8_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::int16_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& ara::log::LogStream::operator<<(std::int32_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(std::int64_t value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(float value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(double value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(const core::StringView value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value.data());
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(const char* const value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", value);
+    impl_->dlt_message->AddArgument(value);
   }
   return *this;
 }
 
 LogStream& LogStream::operator<<(core::Span<const core::Byte> value) noexcept {
   if (Enabled()) {
-    fmt::format_to(std::back_inserter(impl_->s), "{}", fmt::join(value, ""));
+    impl_->dlt_message->AddArgument(fmt::format("{}", fmt::join(value, "")).data());
   }
   return *this;
 }

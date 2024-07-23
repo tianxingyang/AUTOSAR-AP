@@ -163,6 +163,12 @@ class ExtensionHeader {
 };
 
 class Payload {
+ public:
+  template <typename T>
+  void AddArgument(T&& arg) {
+    arguments_.emplace_back(std::forward<T>(arg));
+  }
+
  private:
   static constexpr std::uint8_t kTypeBoolOffset{4U};
   static constexpr std::uint8_t kTypeSignedOffset{5U};
@@ -171,36 +177,61 @@ class Payload {
   static constexpr std::uint8_t kTypeStringOffset{9U};
   class Argument {
    public:
-    template <typename T>
-    Argument(T&& value) {
+    template <typename Ty_>
+    Argument(Ty_&& value) {
+      using T = std::decay_t<Ty_>;
       if constexpr (std::is_same_v<T, bool>) {
+        type_info_ = 1U;
         type_info_ |= 1U << kTypeBoolOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_signed_v<T>()) {
+      } else if constexpr (std::is_signed_v<T>) {
+        if constexpr (std::is_same_v<T, std::int8_t>) {
+          type_info_ = 1U;
+        } else if constexpr (std::is_same_v<T, std::int16_t>) {
+          type_info_ = 2U;
+        } else if constexpr (std::is_same_v<T, std::int32_t>) {
+          type_info_ |= 3U;
+        } else if constexpr (std::is_same_v<T, std::int64_t>) {
+          type_info_ |= 4U;
+        } else {
+          // TODO support 128bit signed integer
+        }
         type_info_ |= 1U << kTypeSignedOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_unsigned_v<T>()) {
+      } else if constexpr (std::is_unsigned_v<T>) {
+        if constexpr (std::is_same_v<T, std::uint8_t>) {
+          type_info_ = 1U;
+        } else if constexpr (std::is_same_v<T, std::uint16_t>) {
+          type_info_ |= 2U;
+        } else if constexpr (std::is_same_v<T, std::uint32_t>) {
+          type_info_ |= 3U;
+        } else if constexpr (std::is_same_v<T, std::uint64_t>) {
+          type_info_ |= 4U;
+        } else {
+          // TODO support 128bit unsigned integer
+        }
         type_info_ |= 1U << kTypeUnsignedOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_floating_point_v<T>()) {
+      } else if constexpr (std::is_floating_point_v<T>) {
+        if constexpr (std::is_same_v<T, float>) {
+          type_info_ |= 3U;
+        } else if constexpr (std::is_same_v<T, double>) {
+          type_info_ |= 4U;
+        } else {
+          // TODO support long double
+        }
         type_info_ |= 1U << kTypeFloatOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_same_v<T, core::String>) {
+      } else if constexpr (std::is_same_v<T, char*>) {
         type_info_ |= 1U << kTypeStringOffset;
-        data_payload_.resize(value.size());
-        std::memcpy(data_payload_.data(), value.data(), value.size());
+        data_payload_.resize(strlen(value) + 1);
+        std::memcpy(data_payload_.data(), value, strlen(value));
       }
     }
-
-    auto GetInteger() const;
-
-    auto GetString() const;
-
-    auto GetFloat() const;
 
    private:
     uint32_t type_info_{0U};
@@ -216,7 +247,12 @@ class Message {
  public:
   static std::shared_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
 
-  explicit Message(ThisIsPrivateType, BaseHeader&& base_header);
+  Message(ThisIsPrivateType, BaseHeader&& base_header);
+
+  template <typename T>
+  void AddArgument(T&& arg) {
+    payload_->AddArgument(std::forward<T>(arg));
+  }
 
  private:
   struct ThisIsPrivateType {};
