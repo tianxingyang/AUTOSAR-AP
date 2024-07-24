@@ -1,7 +1,5 @@
 #include "ara/log/log_stream.h"
 
-#include <fmt/format.h>
-
 #include <cstdint>
 
 #include "ara/core/utility.h"
