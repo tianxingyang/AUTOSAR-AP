@@ -110,19 +110,18 @@ MessageInfo MessageInfo::NetworkMessage(NetworkMessageInfo network_info) {
 }
 
 LogLevel MessageInfo::GetLogLevel() const {
-  fmt::print("{}\n", value_.to_string());
   return static_cast<LogLevel>(value_[7] << 3 | value_[6] << 2 | value_[5] << 1 | value_[4]);
 }
 
 MessageInfo::MessageInfo(MessageType message_type, std::uint8_t const message_type_info) {
-  value_[1] = (static_cast<uint8_t>(message_type) >> 1) & 1;
-  value_[2] = (static_cast<uint8_t>(message_type) >> 2) & 1;
-  value_[3] = (static_cast<uint8_t>(message_type) >> 3) & 1;
+  value_[1] = (static_cast<uint8_t>(message_type) >> 0) & 1;
+  value_[2] = (static_cast<uint8_t>(message_type) >> 1) & 1;
+  value_[3] = (static_cast<uint8_t>(message_type) >> 2) & 1;
 
-  value_[4] = (message_type_info >> 4) & 1;
-  value_[5] = (message_type_info >> 5) & 1;
-  value_[6] = (message_type_info >> 6) & 1;
-  value_[7] = (message_type_info >> 7) & 1;
+  value_[4] = (message_type_info >> 0) & 1;
+  value_[5] = (message_type_info >> 1) & 1;
+  value_[6] = (message_type_info >> 2) & 1;
+  value_[7] = (message_type_info >> 3) & 1;
 }
 
 Timestamp::Timestamp() {
@@ -140,7 +139,13 @@ BaseHeader BaseHeader::VerboseModeLogBaseHeader(HeaderType&& header_type, LogLev
   return base_header;
 }
 
-LogLevel BaseHeader::GetLogLevel() const { return static_cast<LogLevel>(message_info_->GetLogLevel()); }
+LogLevel BaseHeader::GetLogLevel() const {
+  if (!message_info_) {
+    return LogLevel::kOff;
+  }
+
+  return message_info_->GetLogLevel();
+}
 
 BaseHeader::BaseHeader(HeaderType&& header_type) : header_type_{header_type} {}
 
