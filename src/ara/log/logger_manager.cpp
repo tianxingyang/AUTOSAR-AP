@@ -18,7 +18,7 @@ core::Result<void> LoggerManager::Init() {
     }
   }
 
-  return {};
+  return R::FromValue();
 }
 
 Logger& LoggerManager::CreateLogger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel threshold) {
