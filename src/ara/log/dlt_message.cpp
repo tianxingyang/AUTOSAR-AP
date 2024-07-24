@@ -2,14 +2,35 @@
 
 #include <chrono>
 
-#include "fmt/format.h"
-#include "fmt/std.h"
 #include "ara/core/string_view.h"
+#include "ara/log/common.h"
 #include "ara/log/dlt_message.h"
+#include "ara/log/log_config.h"
+#include "fmt/core.h"
+#include "fmt/std.h"
 
 namespace {
 constexpr ara::core::StringView kTextFormat{"{time}|{ecu_id}|{app_id}|{ctx_id}|{thread_id}|{log_level}|{message}"};
+
+ara::core::StringView LogLevelToString(ara::log::LogLevel log_level) {
+  switch (log_level) {
+    case ara::log::LogLevel::kFatal:
+      return "FATAL";
+    case ara::log::LogLevel::kError:
+      return "ERROR";
+    case ara::log::LogLevel::kWarn:
+      return "WARN";
+    case ara::log::LogLevel::kInfo:
+      return "INFO";
+    case ara::log::LogLevel::kDebug:
+      return "DEBUG";
+    case ara::log::LogLevel::kVerbose:
+      return "VERBOSE";
+    default:
+      return "UNKNOWN";
+  }
 }
+}  // namespace
 
 namespace ara::log::dlt {
 thread_local std::thread::id Message::thread_id_{std::this_thread::get_id()};
@@ -88,6 +109,11 @@ MessageInfo MessageInfo::NetworkMessage(NetworkMessageInfo network_info) {
   return MessageInfo{MessageType::kNetwork, static_cast<std::uint8_t>(network_info)};
 }
 
+LogLevel MessageInfo::GetLogLevel() const {
+  fmt::print("{}\n", value_.to_string());
+  return static_cast<LogLevel>(value_[7] << 3 | value_[6] << 2 | value_[5] << 1 | value_[4]);
+}
+
 MessageInfo::MessageInfo(MessageType message_type, std::uint8_t const message_type_info) {
   value_[1] = (static_cast<uint8_t>(message_type) >> 1) & 1;
   value_[2] = (static_cast<uint8_t>(message_type) >> 2) & 1;
@@ -114,6 +140,8 @@ BaseHeader BaseHeader::VerboseModeLogBaseHeader(HeaderType&& header_type, LogLev
   return base_header;
 }
 
+LogLevel BaseHeader::GetLogLevel() const { return static_cast<LogLevel>(message_info_->GetLogLevel()); }
+
 BaseHeader::BaseHeader(HeaderType&& header_type) : header_type_{header_type} {}
 
 std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level) {
@@ -131,9 +159,10 @@ const core::String& Message::ToString() const {
     return text_.value();
   }
 
-  text_ =  fmt::format(kTextFormat, fmt::arg("time", "time"), fmt::arg("ecu_id", "ecu_id"), fmt::arg("app_id", "app_id"),
-              fmt::arg("ctx_id", "ctx_id"), fmt::arg("thread_id", thread_id_), fmt::arg("log_level", "log_level"),
-              fmt::arg("message", "message"));
+  text_ =
+      fmt::format(kTextFormat, fmt::arg("time", "time"), fmt::arg("ecu_id", LogConfig::Instance().EcuId()),
+                  fmt::arg("app_id", "app_id"), fmt::arg("ctx_id", "ctx_id"), fmt::arg("thread_id", thread_id_),
+                  fmt::arg("log_level", LogLevelToString(base_header_.GetLogLevel())), fmt::arg("message", "message"));
 
   return text_.value();
 }

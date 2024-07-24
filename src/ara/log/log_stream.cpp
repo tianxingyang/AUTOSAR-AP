@@ -44,6 +44,13 @@ struct LogStream::Impl {
 LogStream::LogStream(LogLevel log_level, const Logger& logger) : impl_{std::make_shared<Impl>()} {
   impl_->dlt_message = dlt::Message::VerboseModeLogMessage(log_level);
   impl_->log_level = log_level;
+  impl_->owner_key = logger.GetKey();
+}
+
+LogStream::~LogStream() noexcept {
+  if (impl_->dlt_message) {
+    Flush();
+  }
 }
 
 void LogStream::Flush() noexcept {

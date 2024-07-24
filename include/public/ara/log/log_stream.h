@@ -23,6 +23,8 @@ class LogStream final {
  public:
   LogStream(LogLevel log_level, const Logger& logger);
 
+  ~LogStream() noexcept;
+
   /// @brief Sends out the current log buffer and initiates a new message stream.
   void Flush() noexcept;
 

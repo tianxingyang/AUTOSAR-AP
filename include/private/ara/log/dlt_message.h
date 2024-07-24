@@ -113,6 +113,8 @@ class MessageInfo {
 
   static MessageInfo NetworkMessage(NetworkMessageInfo network_info);
 
+  LogLevel GetLogLevel() const;
+
  private:
   MessageInfo(MessageType message_type, std::uint8_t message_type_info);
 
@@ -132,6 +134,8 @@ class Timestamp {
 class BaseHeader {
  public:
   static BaseHeader VerboseModeLogBaseHeader(HeaderType&& header_type, LogLevel log_level);
+
+  LogLevel GetLogLevel() const;
 
  private:
   explicit BaseHeader(HeaderType&& header_type);
