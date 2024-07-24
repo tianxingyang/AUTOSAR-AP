@@ -60,13 +60,7 @@ Logger::Logger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel thre
 const Logger::Key& Logger::GetKey() const { return impl_->ctx_id; }
 
 void Logger::Handle(std::shared_ptr<dlt::Message> message) {
-  auto handlers_result = LoggerManager::Instance().GetLoggingHandlers(GetKey());
-  if (!handlers_result) {
-    fmt::print("get handlers failed, {}", handlers_result.Error().Message());
-    return;
-  }
-
-  for (auto& handler : handlers_result->get()) {
+  for (auto& handler : LoggerManager::Instance().GetLoggingHandlers()) {
     handler->Emit(message);
   }
 }

@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cstring>
 #include <memory>
+#include <thread>
 #include <type_traits>
 
 #include "ara/core/optional.h"
@@ -254,6 +255,8 @@ class Message {
     payload_->AddArgument(std::forward<T>(arg));
   }
 
+  const core::String& ToString() const;
+
  private:
   struct ThisIsPrivateType {};
 
@@ -263,6 +266,8 @@ class Message {
   BaseHeader base_header_;
   core::Optional<ExtensionHeader> ext_header_;
   core::Optional<Payload> payload_;
+  mutable core::Optional<core::String> text_;
+  thread_local static std::thread::id thread_id_;
 };
 }  // namespace ara::log::dlt
 

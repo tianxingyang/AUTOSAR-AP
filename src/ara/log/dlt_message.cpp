@@ -2,9 +2,17 @@
 
 #include <chrono>
 
+#include "fmt/format.h"
+#include "fmt/std.h"
+#include "ara/core/string_view.h"
 #include "ara/log/dlt_message.h"
 
+namespace {
+constexpr ara::core::StringView kTextFormat{"{time}|{ecu_id}|{app_id}|{ctx_id}|{thread_id}|{log_level}|{message}"};
+}
+
 namespace ara::log::dlt {
+thread_local std::thread::id Message::thread_id_{std::this_thread::get_id()};
 constexpr std::uint8_t kVersionNumber{2};
 
 HeaderType::HeaderType() {
@@ -117,4 +125,17 @@ Message::Message(ThisIsPrivateType, BaseHeader&& base_header) : base_header_{bas
 std::shared_ptr<Message> Message::Create(BaseHeader&& base_header) {
   return std::make_shared<Message>(ThisIsPrivateType{}, std::move(base_header));
 }
+
+const core::String& Message::ToString() const {
+  if (text_) {
+    return text_.value();
+  }
+
+  text_ =  fmt::format(kTextFormat, fmt::arg("time", "time"), fmt::arg("ecu_id", "ecu_id"), fmt::arg("app_id", "app_id"),
+              fmt::arg("ctx_id", "ctx_id"), fmt::arg("thread_id", thread_id_), fmt::arg("log_level", "log_level"),
+              fmt::arg("message", "message"));
+
+  return text_.value();
+}
+
 }  // namespace ara::log::dlt

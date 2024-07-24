@@ -9,6 +9,8 @@ const char* LogErrorDomain::Message(CodeType error_code) const noexcept {
       return "logger not found";
     case Errc::kInvalidConfig:
       return "invalid log config";
+    case Errc::kInvalidLogSink:
+      return "invalid log sink";
     default:
       return "Unknown error";
   }
