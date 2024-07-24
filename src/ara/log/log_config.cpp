@@ -15,6 +15,7 @@ core::Result<void> LogConfig::Init(core::StringView config_path) {
     std::ifstream file(config_path.data());
     file >> config;
     ecu_id_ = config["EcuId"].get<core::String>();
+    log_sinks_ = config["LogSinks"].get<core::Vector<core::String>>();
     return R::FromValue();
   } catch (...) {
     return R::FromError(LogErrc::kInvalidConfig);
@@ -22,4 +23,7 @@ core::Result<void> LogConfig::Init(core::StringView config_path) {
 }
 
 const core::String& LogConfig::EcuId() const { return ecu_id_; }
+
+const core::Vector<core::String>& LogConfig::LogSinks() const { return log_sinks_; }
+
 }  // namespace ara::log

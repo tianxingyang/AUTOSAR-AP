@@ -5,6 +5,7 @@
 #include "ara/core/singleton_pattern.h"
 #include "ara/core/string.h"
 #include "ara/core/string_view.h"
+#include "ara/core/vector.h"
 
 namespace ara::log {
 class LogConfig : public core::Singleton<LogConfig> {
@@ -13,8 +14,11 @@ class LogConfig : public core::Singleton<LogConfig> {
 
   const core::String& EcuId() const;
 
+  const core::Vector<core::String>& LogSinks() const;
+
  private:
   core::String ecu_id_;
+  core::Vector<core::String> log_sinks_;
 };
 }  // namespace ara::log
 

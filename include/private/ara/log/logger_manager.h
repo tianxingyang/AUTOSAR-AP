@@ -14,14 +14,6 @@
 #include "ara/log/logging_handler.h"
 
 namespace ara::log {
-namespace internal {
-struct LoggerImpl {
-  explicit LoggerImpl(Logger* logger_ptr) : logger{std::unique_ptr<Logger>(logger_ptr)} {}
-  std::unique_ptr<Logger> logger;
-  core::Vector<std::unique_ptr<LoggingHandler>> logging_handlers;
-};
-}  // namespace internal
-
 class LoggerManager : public core::Singleton<LoggerManager> {
  public:
   core::Result<void> Init();
@@ -30,17 +22,12 @@ class LoggerManager : public core::Singleton<LoggerManager> {
 
   core::Optional<std::reference_wrapper<Logger>> GetLogger(const Logger::Key& key);
 
-  core::Result<void> AddLoggingHandler(Logger::Key key, std::unique_ptr<LoggingHandler> logging_handler);
-
-  core::Result<std::reference_wrapper<core::Vector<std::unique_ptr<LoggingHandler>>>> GetLoggingHandlers(
-      Logger::Key key);
-
- private:
-  core::Optional<std::reference_wrapper<internal::LoggerImpl>> GetLoggerImpl(const Logger::Key& key);
+  const core::Vector<std::unique_ptr<LoggingHandler>>& GetLoggingHandlers();
 
  private:
   std::mutex loggers_mtx_;
-  std::unordered_map<Logger::Key, std::unique_ptr<internal::LoggerImpl>> loggers_;
+  std::unordered_map<Logger::Key, std::unique_ptr<Logger>> loggers_;
+  core::Vector<std::unique_ptr<LoggingHandler>> logging_handlers_;
 };
 }  // namespace ara::log
 
