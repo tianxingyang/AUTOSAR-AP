@@ -59,6 +59,8 @@ Logger::Logger(core::StringView ctx_id, core::StringView ctx_desc, LogLevel thre
 
 const Logger::Key& Logger::GetKey() const { return impl_->ctx_id; }
 
+core::StringView Logger::CtxId() const { return GetKey(); }
+
 void Logger::Handle(std::shared_ptr<dlt::Message> message) {
   for (auto& handler : LoggerManager::Instance().GetLoggingHandlers()) {
     handler->Emit(message);

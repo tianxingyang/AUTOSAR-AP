@@ -6,8 +6,8 @@ if [ $# -eq 1 ] && [ $1 = "clean" ]; then
     exit 0
 fi
 
-#build_type="Debug"
-build_type="Release"
+build_type="Debug"
+#build_type="Release"
 
 conan install -of=third-party --build=missing --profile=./ap_$build_type .
 

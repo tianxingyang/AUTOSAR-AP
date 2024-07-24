@@ -1,4 +1,5 @@
 {
-    "EcuId": "A72",
-    "LogSinks": ["CONSOLE"]
+  "EcuId": "A72",
+  "LogSinks": [ "CONSOLE" ],
+  "AppId": "EM"
 }

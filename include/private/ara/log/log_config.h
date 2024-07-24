@@ -16,9 +16,12 @@ class LogConfig : public core::Singleton<LogConfig> {
 
   const core::Vector<core::String>& LogSinks() const;
 
+  const core::String& AppId() const;
+
  private:
   core::String ecu_id_;
   core::Vector<core::String> log_sinks_;
+  core::String app_id_;
 };
 }  // namespace ara::log
 

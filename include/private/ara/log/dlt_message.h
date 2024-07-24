@@ -9,6 +9,7 @@
 
 #include "ara/core/optional.h"
 #include "ara/core/string.h"
+#include "ara/core/string_view.h"
 #include "ara/core/utility.h"
 #include "ara/core/vector.h"
 #include "ara/log/common.h"
@@ -126,6 +127,8 @@ class Timestamp {
  public:
   Timestamp();
 
+  const core::String ToString() const;
+
  private:
   std::uint32_t nanoseconds_;
   std::uint64_t seconds_;
@@ -136,6 +139,8 @@ class BaseHeader {
   static BaseHeader VerboseModeLogBaseHeader(HeaderType&& header_type, LogLevel log_level);
 
   LogLevel GetLogLevel() const;
+
+  const core::String GetTimeStr() const;
 
  private:
   explicit BaseHeader(HeaderType&& header_type);
@@ -151,6 +156,21 @@ class BaseHeader {
 };
 
 class ExtensionHeader {
+ public:
+  ExtensionHeader() = default;
+
+  void SetEcuId(core::StringView ecu_id);
+
+  core::StringView EcuId() const;
+
+  void SetAppId(core::StringView app_id);
+
+  core::StringView AppId() const;
+
+  void SetCtxId(core::StringView ctx_id);
+
+  core::StringView CtxId() const;
+
  private:
   template <typename DT, typename VT>
   struct Field {
@@ -168,13 +188,6 @@ class ExtensionHeader {
 };
 
 class Payload {
- public:
-  template <typename T>
-  void AddArgument(T&& arg) {
-    arguments_.emplace_back(std::forward<T>(arg));
-  }
-
- private:
   static constexpr std::uint8_t kTypeBoolOffset{4U};
   static constexpr std::uint8_t kTypeSignedOffset{5U};
   static constexpr std::uint8_t kTypeUnsignedOffset{6U};
@@ -238,11 +251,22 @@ class Payload {
       }
     }
 
+    core::String ToString() const;
+
    private:
     uint32_t type_info_{0U};
     core::Vector<core::Byte> data_payload_;
   };
 
+ public:
+  template <typename T>
+  void AddArgument(T&& arg) {
+    arguments_.emplace_back(std::forward<T>(arg));
+  }
+
+  const core::Vector<Argument>& Arguments() const;
+
+ private:
   core::Vector<Argument> arguments_;
 };
 
@@ -250,7 +274,7 @@ class Message {
   struct ThisIsPrivateType;
 
  public:
-  static std::shared_ptr<Message> VerboseModeLogMessage(LogLevel log_level);
+  static std::shared_ptr<Message> VerboseModeLogMessage(LogLevel log_level, core::StringView ctx_id);
 
   Message(ThisIsPrivateType, BaseHeader&& base_header);
 

@@ -10,7 +10,7 @@
 #include "fmt/std.h"
 
 namespace {
-constexpr ara::core::StringView kTextFormat{"{time}|{ecu_id}|{app_id}|{ctx_id}|{thread_id}|{log_level}|{message}"};
+constexpr ara::core::StringView kTextFormat{"{time}|{ecu_id}|{app_id}|{ctx_id}|{thread_id}|{log_level}|"};
 
 ara::core::StringView LogLevelToString(ara::log::LogLevel log_level) {
   switch (log_level) {
@@ -133,9 +133,14 @@ Timestamp::Timestamp() {
   // TODO set mask
 }
 
+const core::String Timestamp::ToString() const {
+  return fmt::format("{:%Y-%m-%d %H:%M:%S}.{:0>9}", fmt::localtime(seconds_), nanoseconds_);
+}
+
 BaseHeader BaseHeader::VerboseModeLogBaseHeader(HeaderType&& header_type, LogLevel log_level) {
   BaseHeader base_header{std::move(header_type)};
   base_header.message_info_ = MessageInfo::LogMessage(log_level);
+  base_header.timestamp_ = Timestamp{};
   return base_header;
 }
 
@@ -147,10 +152,73 @@ LogLevel BaseHeader::GetLogLevel() const {
   return message_info_->GetLogLevel();
 }
 
+const core::String BaseHeader::GetTimeStr() const {
+  if (!timestamp_) {
+    return {};
+  }
+
+  return timestamp_->ToString();
+}
+
 BaseHeader::BaseHeader(HeaderType&& header_type) : header_type_{header_type} {}
 
-std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level) {
-  return Message::Create(BaseHeader::VerboseModeLogBaseHeader(HeaderType::VerboseMode(), log_level));
+void ExtensionHeader::SetEcuId(core::StringView ecu_id) {
+  ecu_id_.desc = ecu_id.size();
+  ecu_id_.value = ecu_id;
+}
+
+core::StringView ExtensionHeader::EcuId() const {
+  if (!ecu_id_.value) {
+    return "";
+  }
+  return *ecu_id_.value;
+}
+
+void ExtensionHeader::SetAppId(core::StringView app_id) {
+  app_id_.desc = app_id.size();
+  app_id_.value = app_id;
+}
+
+core::StringView ExtensionHeader::AppId() const {
+  if (!app_id_.value) {
+    return "";
+  }
+  return *app_id_.value;
+}
+
+void ExtensionHeader::SetCtxId(core::StringView ctx_id) {
+  ctx_id_.desc = ctx_id.size();
+  ctx_id_.value = ctx_id;
+}
+
+core::StringView ExtensionHeader::CtxId() const {
+  if (!ctx_id_.value) {
+    return "";
+  }
+  return *ctx_id_.value;
+}
+
+const core::Vector<Payload::Argument>& Payload::Arguments() const { return arguments_; }
+
+core::String Payload::Argument::ToString() const {
+  if (type_info_ & (1 << kTypeBoolOffset)) {
+    return std::to_integer<bool>(data_payload_[0]) ? "true" : "false";
+  } else if (type_info_ & (1 << kTypeSignedOffset)) {
+  } else if (type_info_ & (1 << kTypeUnsignedOffset)) {
+  } else if (type_info_ & (1 << kTypeFloatOffset)) {
+  } else if (type_info_ & (1 << kTypeStringOffset)) {
+  } else {
+  }
+  return "";
+}
+
+std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level, core::StringView ctx_id) {
+  auto msg_ptr = Message::Create(BaseHeader::VerboseModeLogBaseHeader(HeaderType::VerboseMode(), log_level));
+  msg_ptr->ext_header_ = ExtensionHeader{};
+  msg_ptr->ext_header_->SetEcuId(LogConfig::Instance().EcuId());
+  msg_ptr->ext_header_->SetAppId(LogConfig::Instance().AppId());
+  msg_ptr->ext_header_->SetCtxId(ctx_id);
+  return msg_ptr;
 }
 
 Message::Message(ThisIsPrivateType, BaseHeader&& base_header) : base_header_{base_header} {}
@@ -165,10 +233,15 @@ const core::String& Message::ToString() const {
   }
 
   text_ =
-      fmt::format(kTextFormat, fmt::arg("time", "time"), fmt::arg("ecu_id", LogConfig::Instance().EcuId()),
-                  fmt::arg("app_id", "app_id"), fmt::arg("ctx_id", "ctx_id"), fmt::arg("thread_id", thread_id_),
-                  fmt::arg("log_level", LogLevelToString(base_header_.GetLogLevel())), fmt::arg("message", "message"));
+      fmt::format(kTextFormat, fmt::arg("time", base_header_.GetTimeStr()),
+                  fmt::arg("ecu_id", ext_header_ ? ext_header_->EcuId() : "UNKNOWN"),
+                  fmt::arg("app_id", ext_header_ ? ext_header_->AppId() : "UNKNOWN"),
+                  fmt::arg("ctx_id", ext_header_ ? ext_header_->CtxId() : "UNKNOWN"), fmt::arg("thread_id", thread_id_),
+                  fmt::arg("log_level", LogLevelToString(base_header_.GetLogLevel())));
 
+  for (auto& arg : payload_->Arguments()) {
+    fmt::format_to(std::back_inserter(*text_), "{} ", arg.ToString());
+  }
   return text_.value();
 }
 

@@ -193,9 +193,9 @@ class Logger {
 
   [[nodiscard]] const Key& GetKey() const;
 
-  void Handle(std::shared_ptr<dlt::Message> message);
+  core::StringView CtxId() const;
 
-  void MakeRecord();
+  void Handle(std::shared_ptr<dlt::Message> message);
 
  private:
   friend class LoggerManager;
