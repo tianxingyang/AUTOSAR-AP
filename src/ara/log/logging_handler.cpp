@@ -1,6 +1,5 @@
 #include "ara/log/logging_handler.h"
 
-#include "ara/core/string_view.h"
 #include "ara/log/dlt_message.h"
 #include "fmt/core.h"
 
