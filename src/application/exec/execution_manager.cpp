@@ -3,7 +3,7 @@
 
 void Run() {
   const auto logger{ara::log::CreateLogger("em", "em", ara::log::LogLevel::kVerbose)};
-  for (int i{0}; i < 100; ++i) {
+  for (int i{0}; i < 5; ++i) {
     logger.LogVerbose() << true;
     logger.LogDebug() << false;
     logger.LogInfo() << true;
