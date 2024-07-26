@@ -6,6 +6,7 @@
 #include "ara/log/common.h"
 #include "ara/log/dlt_message.h"
 #include "ara/log/log_config.h"
+#include "fmt/chrono.h"
 #include "fmt/core.h"
 #include "fmt/std.h"
 
@@ -218,6 +219,7 @@ std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level, core
   msg_ptr->ext_header_->SetEcuId(LogConfig::Instance().EcuId());
   msg_ptr->ext_header_->SetAppId(LogConfig::Instance().AppId());
   msg_ptr->ext_header_->SetCtxId(ctx_id);
+  msg_ptr->payload_ = Payload{};
   return msg_ptr;
 }
 
