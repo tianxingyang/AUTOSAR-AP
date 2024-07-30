@@ -60,7 +60,7 @@ class ErrorCode final {
 /// @param lhs the left hand side of the comparison
 /// @param rhs the right hand side of the comparison
 /// @return true if the two instances compare equal, false otherwise
-constexpr bool operator==(const ErrorCode& lhs, const ErrorCode& rhs) noexcept {
+inline constexpr bool operator==(const ErrorCode& lhs, const ErrorCode& rhs) noexcept {
   return lhs.Domain() == rhs.Domain() && lhs.Value() == rhs.Value();
 }
 
@@ -70,7 +70,7 @@ constexpr bool operator==(const ErrorCode& lhs, const ErrorCode& rhs) noexcept {
 /// @param lhs the left hand side of the comparison
 /// @param rhs the right hand side of the comparison
 /// @return true if the two instances compare not equal, false otherwise
-constexpr bool operator!=(const ErrorCode& lhs, const ErrorCode& rhs) noexcept { return !(lhs == rhs); }
+inline constexpr bool operator!=(const ErrorCode& lhs, const ErrorCode& rhs) noexcept { return !(lhs == rhs); }
 
 }  // namespace ara::core
 

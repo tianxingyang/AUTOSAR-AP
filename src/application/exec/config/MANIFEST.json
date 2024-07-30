@@ -1,0 +1,5 @@
+{
+  "EcuId": "A72",
+  "LogSinks": [ "CONSOLE" ],
+  "AppId": "EM"
+}

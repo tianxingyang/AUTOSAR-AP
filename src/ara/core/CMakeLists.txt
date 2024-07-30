@@ -1,14 +1,19 @@
 project(core)
 
-add_library(core SHARED
- "error_code.cpp"
- "core_error_domain.cpp"
- "future_error_domain.cpp"
- "initialization.cpp"
- "abort.cpp")
+set(${PROJECT_NAME}_SOURCES 
+  "error_code.cpp"
+  "core_error_domain.cpp"
+  "future_error_domain.cpp"
+  "initialization.cpp"
+  "abort.cpp"
+)
 
-set_target_properties(core PROPERTIES LINKER_LANGUAGE CXX)
+add_project_library(${PROJECT_NAME} ${PROJECT_NAME}_SOURCES)
 
-target_include_directories(core PUBLIC ${CMAKE_SOURCE_DIR}/include/public)
+target_include_directories(${PROJECT_NAME} PRIVATE 
+  ${CMAKE_SOURCE_DIR}/include/private
+)
 
-target_link_libraries(core fmt::fmt)
+target_link_libraries(${PROJECT_NAME} 
+  PRIVATE
+  fmt::fmt)

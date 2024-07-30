@@ -92,13 +92,13 @@ class InstanceSpecifier final {
 /// @param lhs stringified form of a InstanceSpecifier
 /// @param rhs an InstanceSpecifier
 /// @return true in case rhs string representation equals lhs
-bool operator==(StringView lhs, const InstanceSpecifier& rhs) noexcept { return rhs == lhs; }
+inline bool operator==(StringView lhs, const InstanceSpecifier& rhs) noexcept { return rhs == lhs; }
 
 /// @brief Non-member function operator!= to allow StringView on lhs.
 /// @param lhs stringified form of a InstanceSpecifier
 /// @param rhs an InstanceSpecifier
 /// @return true in case rhs string representation not equals lhs
-bool operator!=(StringView lhs, const InstanceSpecifier& rhs) noexcept { return rhs != lhs; }
+inline bool operator!=(StringView lhs, const InstanceSpecifier& rhs) noexcept { return rhs != lhs; }
 }  // namespace ara::core
 
 #endif
