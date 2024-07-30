@@ -1,10 +1,12 @@
 #include "ara/log/dlt_message.h"
 
+#include <syscall.h>
+
+#include <cassert>
 #include <chrono>
 
 #include "ara/core/string_view.h"
 #include "ara/log/common.h"
-#include "ara/log/dlt_message.h"
 #include "ara/log/log_config.h"
 #include "fmt/chrono.h"
 #include "fmt/core.h"
@@ -27,14 +29,62 @@ ara::core::StringView LogLevelToString(ara::log::LogLevel log_level) {
       return "DEBUG";
     case ara::log::LogLevel::kVerbose:
       return "VERBOSE";
+    case ara::log::LogLevel::kOff:
+      return "OFF";
     default:
       return "UNKNOWN";
   }
 }
+
+std::int64_t GetSignedInteger(std::uint32_t type_info, const ara::core::Vector<ara::core::Byte>& bytes) {
+  if ((type_info & 0xF) == 0x01) {
+    return *reinterpret_cast<const std::int8_t*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x02) {
+    return *reinterpret_cast<const std::int16_t*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x03) {
+    return *reinterpret_cast<const std::int32_t*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x04) {
+    return *reinterpret_cast<const std::int64_t*>(bytes.data());
+  }
+
+  assert(false);
+}
+
+std::uint64_t GetUnsignedInteger(std::uint32_t type_info, const ara::core::Vector<ara::core::Byte>& bytes) {
+  if ((type_info & 0xF) == 0x01) {
+    return *reinterpret_cast<const std::uint8_t*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x02) {
+    return *reinterpret_cast<const std::uint16_t*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x03) {
+    return *reinterpret_cast<const std::uint32_t*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x04) {
+    return *reinterpret_cast<const std::uint64_t*>(bytes.data());
+  }
+
+  assert(false);
+}
+
+double GetFloat(std::uint32_t type_info, const ara::core::Vector<ara::core::Byte>& bytes) {
+  if ((type_info & 0xF) == 0x03) {
+    return *reinterpret_cast<const float*>(bytes.data());
+  }
+  if ((type_info & 0xF) == 0x04) {
+    return *reinterpret_cast<const double*>(bytes.data());
+  }
+
+  assert(false);
+}
 }  // namespace
 
 namespace ara::log::dlt {
-thread_local std::thread::id Message::thread_id_{std::this_thread::get_id()};
+thread_local std::int64_t Message::thread_id_{syscall(SYS_gettid)};
+std::atomic_uint8_t BaseHeader::message_counter_{0};
 constexpr std::uint8_t kVersionNumber{2};
 
 HeaderType::HeaderType() {
@@ -153,7 +203,7 @@ LogLevel BaseHeader::GetLogLevel() const {
   return message_info_->GetLogLevel();
 }
 
-const core::String BaseHeader::GetTimeStr() const {
+core::String BaseHeader::GetTimeStr() const {
   if (!timestamp_) {
     return {};
   }
@@ -199,26 +249,41 @@ core::StringView ExtensionHeader::CtxId() const {
   return *ctx_id_.value;
 }
 
-const core::Vector<Payload::Argument>& Payload::Arguments() const { return arguments_; }
-
-core::String Payload::Argument::ToString() const {
-  if (type_info_ & (1 << kTypeBoolOffset)) {
-    return std::to_integer<bool>(data_payload_[0]) ? "true" : "false";
-  } else if (type_info_ & (1 << kTypeSignedOffset)) {
-  } else if (type_info_ & (1 << kTypeUnsignedOffset)) {
-  } else if (type_info_ & (1 << kTypeFloatOffset)) {
-  } else if (type_info_ & (1 << kTypeStringOffset)) {
-  } else {
+core::String Payload::ToString() const {
+  core::String str;
+  for (auto& arg : arguments_) {
+    std::visit([&str](auto value) { fmt::format_to(std::back_inserter(str), "{} ", value); }, arg.GetValue());
   }
-  return "";
+  return str;
+}
+
+Payload::Argument::ValueType Payload::Argument::GetValue() const {
+  if (type_info_ & (1 << kTypeBoolOffset)) {
+    return std::to_integer<bool>(data_payload_[0]);
+  }
+  if (type_info_ & (1 << kTypeSignedOffset)) {
+    return GetSignedInteger(type_info_, data_payload_);
+  }
+  if (type_info_ & (1 << kTypeUnsignedOffset)) {
+    return GetUnsignedInteger(type_info_, data_payload_);
+  }
+  if (type_info_ & (1 << kTypeFloatOffset)) {
+    return GetFloat(type_info_, data_payload_);
+  }
+  if (type_info_ & (1 << kTypeStringOffset)) {
+    return core::StringView{reinterpret_cast<const char*>(data_payload_.data()), data_payload_.size()};
+  }
+
+  assert(false);
 }
 
 std::shared_ptr<Message> Message::VerboseModeLogMessage(LogLevel log_level, core::StringView ctx_id) {
-  auto msg_ptr = Message::Create(BaseHeader::VerboseModeLogBaseHeader(HeaderType::VerboseMode(), log_level));
-  msg_ptr->ext_header_ = ExtensionHeader{};
-  msg_ptr->ext_header_->SetEcuId(LogConfig::Instance().EcuId());
-  msg_ptr->ext_header_->SetAppId(LogConfig::Instance().AppId());
-  msg_ptr->ext_header_->SetCtxId(ctx_id);
+  auto msg_ptr = Create(BaseHeader::VerboseModeLogBaseHeader(HeaderType::VerboseMode(), log_level));
+  ExtensionHeader ext_header{};
+  ext_header.SetEcuId(LogConfig::Instance().EcuId());
+  ext_header.SetAppId(LogConfig::Instance().AppId());
+  ext_header.SetCtxId(ctx_id);
+  msg_ptr->ext_header_ = std::move(ext_header);
   msg_ptr->payload_ = Payload{};
   return msg_ptr;
 }
@@ -241,9 +306,11 @@ const core::String& Message::ToString() const {
                   fmt::arg("ctx_id", ext_header_ ? ext_header_->CtxId() : "UNKNOWN"), fmt::arg("thread_id", thread_id_),
                   fmt::arg("log_level", LogLevelToString(base_header_.GetLogLevel())));
 
-  for (auto& arg : payload_->Arguments()) {
-    fmt::format_to(std::back_inserter(*text_), "{} ", arg.ToString());
+  if (!payload_) {
+    return text_.value();
   }
+
+  fmt::format_to(std::back_inserter(*text_), "{} ", payload_->ToString());
   return text_.value();
 }
 

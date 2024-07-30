@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 #include <type_traits>
+#include <variant>
 
 #include "ara/core/optional.h"
 #include "ara/core/string.h"
@@ -140,14 +141,15 @@ class BaseHeader {
 
   LogLevel GetLogLevel() const;
 
-  const core::String GetTimeStr() const;
+  core::String GetTimeStr() const;
 
  private:
   explicit BaseHeader(HeaderType&& header_type);
 
  private:
   HeaderType header_type_;
-  [[maybe_unused]] std::uint8_t message_counter_{0};
+  static std::atomic_uint8_t message_counter_;
+  std::uint8_t this_counter_{message_counter_++};
   [[maybe_unused]] std::uint16_t message_length_{0};
   core::Optional<MessageInfo> message_info_;
   core::Optional<std::uint8_t> number_of_arguments_;
@@ -194,39 +196,42 @@ class Payload {
   static constexpr std::uint8_t kTypeFloatOffset{7U};
   static constexpr std::uint8_t kTypeStringOffset{9U};
   class Argument {
+    using ValueType = std::variant<bool, std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t, std::int8_t,
+                                   std::int16_t, std::int32_t, std::int64_t, double, float, core::StringView>;
+
    public:
     template <typename Ty_>
-    Argument(Ty_&& value) {
+    Argument(Ty_ value) {
       using T = std::decay_t<Ty_>;
       if constexpr (std::is_same_v<T, bool>) {
         type_info_ = 1U;
         type_info_ |= 1U << kTypeBoolOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_signed_v<T>) {
+      } else if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
         if constexpr (std::is_same_v<T, std::int8_t>) {
           type_info_ = 1U;
         } else if constexpr (std::is_same_v<T, std::int16_t>) {
           type_info_ = 2U;
         } else if constexpr (std::is_same_v<T, std::int32_t>) {
-          type_info_ |= 3U;
+          type_info_ = 3U;
         } else if constexpr (std::is_same_v<T, std::int64_t>) {
-          type_info_ |= 4U;
+          type_info_ = 4U;
         } else {
           // TODO support 128bit signed integer
         }
         type_info_ |= 1U << kTypeSignedOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_unsigned_v<T>) {
+      } else if constexpr (std::is_integral_v<T> && std::is_unsigned_v<T>) {
         if constexpr (std::is_same_v<T, std::uint8_t>) {
           type_info_ = 1U;
         } else if constexpr (std::is_same_v<T, std::uint16_t>) {
-          type_info_ |= 2U;
+          type_info_ = 2U;
         } else if constexpr (std::is_same_v<T, std::uint32_t>) {
-          type_info_ |= 3U;
+          type_info_ = 3U;
         } else if constexpr (std::is_same_v<T, std::uint64_t>) {
-          type_info_ |= 4U;
+          type_info_ = 4U;
         } else {
           // TODO support 128bit unsigned integer
         }
@@ -235,27 +240,28 @@ class Payload {
         std::memcpy(data_payload_.data(), &value, sizeof(T));
       } else if constexpr (std::is_floating_point_v<T>) {
         if constexpr (std::is_same_v<T, float>) {
-          type_info_ |= 3U;
+          type_info_ = 3U;
         } else if constexpr (std::is_same_v<T, double>) {
-          type_info_ |= 4U;
+          type_info_ = 4U;
         } else {
-          // TODO support long double
+          // TODO support long double and half
         }
         type_info_ |= 1U << kTypeFloatOffset;
         data_payload_.resize(sizeof(T));
         std::memcpy(data_payload_.data(), &value, sizeof(T));
-      } else if constexpr (std::is_same_v<T, char*>) {
+      } else if constexpr (std::is_same_v<T, const char*>) {
         type_info_ |= 1U << kTypeStringOffset;
         data_payload_.resize(strlen(value) + 1);
         std::memcpy(data_payload_.data(), value, strlen(value));
       }
     }
 
-    core::String ToString() const;
+    ValueType GetValue() const;
 
    private:
-    uint32_t type_info_{0U};
+    std::uint32_t type_info_{0U};
     core::Vector<core::Byte> data_payload_;
+    ValueType value_;
   };
 
  public:
@@ -264,7 +270,7 @@ class Payload {
     arguments_.emplace_back(std::forward<T>(arg));
   }
 
-  const core::Vector<Argument>& Arguments() const;
+  core::String ToString() const;
 
  private:
   core::Vector<Argument> arguments_;
@@ -295,7 +301,7 @@ class Message {
   core::Optional<ExtensionHeader> ext_header_;
   core::Optional<Payload> payload_;
   mutable core::Optional<core::String> text_;
-  thread_local static std::thread::id thread_id_;
+  thread_local static std::int64_t thread_id_;
 };
 }  // namespace ara::log::dlt
 
