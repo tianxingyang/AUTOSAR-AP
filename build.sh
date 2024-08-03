@@ -16,5 +16,6 @@ if [ ! -d build ]; then
 fi
 
 cd build
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE="$build_type" -DCMAKE_TOOLCHAIN_FILE=x86_64_toolchain ..
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE="$build_type" -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_TOOLCHAIN_FILE=x86_64_toolchain ..
 cmake --build . -j$(nproc)
+cmake --install .

@@ -2,9 +2,12 @@ project(execution_manager)
 
 set(EXEC_NAME execution_manager)
 
-add_executable(${EXEC_NAME} execution_manager.cpp)
-
-target_link_libraries(${EXEC_NAME} PRIVATE 
-  core
-  log
+add_project_executable(
+  NAME
+    execution_manager
+  SOURCES
+    execution_manager.cpp
+  DEPENDENCIES
+    core
+    log
 )

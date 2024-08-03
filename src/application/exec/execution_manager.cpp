@@ -1,16 +1,23 @@
+#include <thread>
+
 #include "ara/core/initialization.h"
 #include "ara/log/logger.h"
 
+bool exitFlag{false};
+
 void Run() {
   const auto logger{ara::log::CreateLogger("em", "em", ara::log::LogLevel::kVerbose)};
-  for (int i{0}; i < 5; ++i) {
-    logger.LogVerbose() << true;
-    logger.LogDebug() << false;
-    logger.LogInfo() << true;
-    logger.LogWarn() << false;
-    logger.LogError() << true;
-    logger.LogFatal() << false;
+
+  while (!exitFlag) {
+    logger.LogInfo() << "Hello, World!";
   }
+}
+
+int SignalHandler(int signal) {
+  exitFlag = true;
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  ara::core::Deinitialize();
+  return signal;
 }
 
 int main() {
@@ -20,6 +27,5 @@ int main() {
 
   Run();
 
-  ara::core::Deinitialize();
   return 0;
 }
