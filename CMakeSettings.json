@@ -7,7 +7,7 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeExecutable": "cmake",
-      "buildCommandArgs": "-j 16",
+      "buildCommandArgs": "-j$(nproc)",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],
       "wslPath": "Ubuntu",
