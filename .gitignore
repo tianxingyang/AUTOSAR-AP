@@ -19,3 +19,4 @@ third-party/*
 !third-party/.gitkeep
 build/
 .cache/
+install/*
