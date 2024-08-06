@@ -13,7 +13,6 @@ enum class ActivationReturnType : std::uint32_t {
   kTerminate = 4,
 };
 
-using ara
 }  // namespace ara::exec
 
 #endif  // VITO_AP_DETERMINISTIC_CLIENT_H_

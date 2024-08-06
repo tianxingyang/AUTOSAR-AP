@@ -7,7 +7,7 @@
 namespace ara::core {
 Result<void> InitLogModule() noexcept {
   using R = Result<void>;
-  if (const auto result{log::LogConfig::Instance().Init("MANIFEST.json")}; !result) {
+  if (const auto result{log::LogConfig::Instance().Init("./etc/MANIFEST.json")}; !result) {
     return R::FromError(result.Error());
   }
 
