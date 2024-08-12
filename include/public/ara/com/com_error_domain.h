@@ -58,8 +58,8 @@ class ComErrorDomain final : public core::ErrorDomain {
   using Errc = ComErrc;
   using Exception = ComException;
 
-  /// @brief Constructs a new ComErrorDomain object - Not allowed.
-  ComErrorDomain() = delete;
+  /// @brief Constructs a new ComErrorDomain object.
+  constexpr ComErrorDomain() : core::ErrorDomain{kId} {};
 
   /// @brief Returns a string constant associated with ComErrorDomain.
   /// @return "Com"
@@ -72,6 +72,16 @@ class ComErrorDomain final : public core::ErrorDomain {
 
   void ThrowAsException(const core::ErrorCode& error_code) const noexcept(false) override;
 };
+
+namespace internal {
+inline constexpr ComErrorDomain com_error_domain;
+}
+
+constexpr const core::ErrorDomain& GetErrorDomain() noexcept { return internal::com_error_domain; }
+
+constexpr core::ErrorCode MakeErrorCode(ComErrc code, core::ErrorDomain::SupportDataType data) noexcept {
+  return core::ErrorCode{static_cast<core::ErrorDomain::CodeType>(code), GetErrorDomain(), data};
+}
 }  // namespace ara::com
 
 #endif  // VITO_AP_COM_ERROR_DOMAIN_H_

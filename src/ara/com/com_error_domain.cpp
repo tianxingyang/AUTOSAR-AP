@@ -1,5 +1,7 @@
 #include "ara/com/com_error_domain.h"
 
+#include "ara/core/error_domain.h"
+
 namespace ara::com {
 const char* ComErrorDomain::Message(CodeType error_code) const noexcept {
   switch (static_cast<ComErrc>(error_code)) {
@@ -43,4 +45,9 @@ const char* ComErrorDomain::Message(CodeType error_code) const noexcept {
       return "Unknown error";
   }
 }
+
+void ComErrorDomain::ThrowAsException(const core::ErrorCode& error_code) const noexcept(false) {
+  throw ComException(error_code);
+}
+
 }  // namespace ara::com
