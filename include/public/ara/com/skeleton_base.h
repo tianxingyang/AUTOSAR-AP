@@ -6,7 +6,7 @@
 namespace ara::com {
 class SkeletonBase {
  public:
-  core::Result<void> OfferService();
+  virtual core::Result<void> OfferService() = 0;
 };
 }  // namespace ara::com
 
